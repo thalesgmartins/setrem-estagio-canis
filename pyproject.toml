@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "setrem-estagio-canis"
+version = "0.0.0"
+description = "Sistema de Gestão para centralizar resgates, adoções e recursos na Patas e Pelos"
+readme = "README.md"
+requires-python = ">=3.10"
+
+dependencies = [
+    "orjson>=3.12.0",
+]
+
+#[project.scripts]
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[project.optional-dependencies]
+dev = ["ruff", "pytest", "pytest-asyncio", "pre-commit"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM"]  # erros, imports, upgrades, bugbear, simplify
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
