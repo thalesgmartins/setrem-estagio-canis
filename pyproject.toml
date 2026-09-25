@@ -16,7 +16,7 @@ dependencies = [
 #[project.scripts]
 
 [tool.setuptools.packages.find]
-where = ["."]
+where = ["setrem_estagio_canis"]
 
 [project.optional-dependencies]
 dev = ["ruff", "pytest", "pytest-asyncio", "pre-commit"]
