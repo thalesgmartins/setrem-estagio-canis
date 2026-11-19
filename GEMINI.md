@@ -1,5 +1,7 @@
 # Agent Guidelines for Python Code Quality
 
+@./design.md
+
 This document provides guidelines for maintaining high-quality Python code. These rules MUST be followed by all AI coding agents and contributors.
 
 ## Your Core Principles

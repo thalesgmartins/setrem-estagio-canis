@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Canis - Gestão Operacional | Patas e Pelos{% endblock %}</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- HTMX 2.x CDN -->
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        patas: {
+                            green: '#05AC78',
+                            'green-hover': '#048c62',
+                            'green-light': '#e6f7f1',
+                            orange: '#ff9d01',
+                            'orange-light': '#fff5e6',
+                            blue: '#5e7dfc',
+                            'blue-light': '#eff2ff',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
+    <!-- Top Navigation Bar -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Brand / Logo Area -->
+                <div class="flex items-center space-x-3">
+                    <img src="/static/logo.jpg" alt="Logo Patas e Pelos" class="w-10 h-10 rounded-full object-cover border border-slate-200 shadow-sm">
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="font-extrabold text-xl tracking-tight text-slate-900">CANIS</span>
+                            <span class="bg-[#e6f7f1] text-[#05AC78] text-xs px-2 py-0.5 rounded font-semibold border border-[#05AC78]/30">Prototipo de Validacao</span>
+                        </div>
+                        <p class="text-xs text-slate-500 font-medium">ONG Patas e Pelos - Horizontina/RS</p>
+                    </div>
+                </div>
+
+                <!-- Navigation Links -->
+                <nav class="hidden md:flex space-x-1 font-medium text-sm">
+                    <a href="#dashboard" class="px-3 py-2 rounded-md text-emerald-700 bg-emerald-50">Painel Geral</a>
+                    <a href="#animais" class="px-3 py-2 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100">Prontuarios & Animais</a>
+                    <a href="#estoque" class="px-3 py-2 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100">Estoque de Medicamentos</a>
+                    <a href="#lares-adocoes" class="px-3 py-2 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100">Lares & Adocoes</a>
+                </nav>
+
+                <!-- Context User / Mode -->
+                <div class="flex items-center space-x-3">
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                        Perfil: Coordenacao Geral
+                    </span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Body -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Modal Target Container for HTMX -->
+    <div id="modal-container"></div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 mt-12 py-6 text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <p>Projeto de Estagio Curricular - Engenharia de Computacao | SETREM 2026</p>
+            <p>Sistema Canis: Autonomia operacional para o terceiro setor</p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Termo de Adoção Responsável - {{ animal.name }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @media print {
+            .no-print { display: none; }
+            body { background: white; padding: 0; }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 p-6 min-h-screen text-slate-800 font-sans">
+    <div class="max-w-3xl mx-auto bg-white p-8 rounded-xl shadow-md border border-slate-200">
+        <!-- Print / Actions Bar -->
+        <div class="no-print flex justify-between items-center mb-6 pb-4 border-b">
+            <span class="text-xs text-slate-500 font-medium">Documento gerado automaticamente pelo Sistema Canis</span>
+            <div class="space-x-2">
+                <button onclick="window.print()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-semibold">
+                    Imprimir Termo
+                </button>
+                <button onclick="window.close()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded text-xs font-semibold">
+                    Fechar
+                </button>
+            </div>
+        </div>
+
+        <!-- Document Header -->
+        <div class="text-center mb-6 border-b pb-4">
+            <h1 class="text-xl font-bold tracking-tight text-slate-900 uppercase">
+                Termo de Responsabilidade e Adoção de Animal
+            </h1>
+            <p class="text-xs text-slate-500 mt-1">
+                Associação de Proteção Animal ONG Patas e Pelos - Horizontina / RS
+            </p>
+        </div>
+
+        <!-- Content -->
+        <div class="space-y-4 text-xs leading-relaxed text-slate-700">
+            <p>
+                Pelo presente instrumento, a <strong>Associação de Proteção Animal Patas e Pelos</strong> efetua a doação do animal abaixo qualificado para o(a) Adotante responsável, que assume integralmente a guarda e o compromisso de bem-estar do animal:
+            </p>
+
+            <!-- Animal Info Box -->
+            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 grid grid-cols-2 gap-3">
+                <div><strong>Nome do Animal:</strong> {{ animal.name }}</div>
+                <div><strong>Especie:</strong> {{ animal.species }}</div>
+                <div><strong>Raca:</strong> {{ animal.breed }}</div>
+                <div><strong>Sexo:</strong> {{ animal.gender }}</div>
+                <div><strong>Idade Aproximada:</strong> {{ animal.age_approx }}</div>
+                <div><strong>Castracao:</strong> {% if animal.neutered %}Sim, castrado(a){% else %}Compromisso de castracao pendente{% endif %}</div>
+            </div>
+
+            <!-- Adopter Fillable Fields -->
+            <h2 class="font-bold text-slate-900 uppercase tracking-wider text-xs border-b pb-1 mt-4">
+                Dados do(a) Adotante
+            </h2>
+            <div class="grid grid-cols-2 gap-3 bg-slate-50 p-4 rounded-lg border border-slate-200">
+                <div><strong>Nome Completo:</strong> ____________________________________</div>
+                <div><strong>CPF:</strong> ____________________________</div>
+                <div><strong>Telefone / WhatsApp:</strong> ____________________________</div>
+                <div><strong>Endereco Residencial:</strong> ____________________________</div>
+            </div>
+
+            <!-- Commitments -->
+            <h2 class="font-bold text-slate-900 uppercase tracking-wider text-xs border-b pb-1 mt-4">
+                Declaracao de Compromisso
+            </h2>
+            <ul class="list-disc pl-5 space-y-1.5 text-slate-600">
+                <li>Garantir abrigo seguro, alimentacao adequada, assistencia veterinaria e afeto ao animal.</li>
+                <li>Nao manter o animal permanentemente acorrentado ou em espaco insalubre.</li>
+                <li>Manter as vacinas polivalente e antirrabica anualmente atualizadas.</li>
+                <li>Permitir o acompanhamento pos-adocao por membros da ONG Patas e Pelos.</li>
+                <li>Comunicar imediatamente a entidade em caso de fuga, doenca grave ou falecimento do animal, nao podendo repassa-lo a terceiros sem previa anuencia.</li>
+            </ul>
+
+            <div class="pt-8 grid grid-cols-2 gap-8 text-center mt-6">
+                <div class="border-t border-slate-400 pt-2">
+                    <p class="font-semibold text-slate-800">Assinatura do(a) Adotante</p>
+                    <p class="text-[10px] text-slate-500">Horizontina/RS, ____ / ____ / 2026</p>
+                </div>
+                <div class="border-t border-slate-400 pt-2">
+                    <p class="font-semibold text-slate-800">ONG Patas e Pelos</p>
+                    <p class="text-[10px] text-slate-500">Responsavel pelo Encaminhamento</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
