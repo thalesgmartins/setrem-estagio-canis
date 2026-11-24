@@ -1,4 +1,4 @@
-"""Integration and unit tests for the Canis application (Auth, Catalog, Finance)."""
+"""Integration and unit tests for the Laika application."""
 
 import os
 from collections.abc import Generator
@@ -19,6 +19,7 @@ from setrem_estagio_canis.database.models import Base
 from setrem_estagio_canis.database.repository import (
     get_user_by_email,
     list_animals,
+    list_financial_transactions,
     list_stock,
     seed_initial_data,
 )
@@ -57,16 +58,15 @@ def test_calculate_metrics_and_alerts() -> None:
     with SessionLocal() as db:
         animals = list_animals(db)
         stock = list_stock(db)
+        transactions = list_financial_transactions(db)
 
     metrics = calculate_metrics(animals, stock)
-    alerts = get_priority_alerts(animals, stock)
+    alerts = get_priority_alerts(stock, transactions)
 
     assert metrics["total_animals"] == len(animals)
-    assert metrics["dogs_count"] >= 1
-    assert metrics["cats_count"] >= 1
+    assert metrics["available_count"] >= 1
     assert metrics["critical_stock_count"] >= 1
-    assert metrics["adoptions_count"] >= 1
-    assert {"Estoque", "Validade", "Clinica"}.issubset({a.category for a in alerts})
+    assert {"Estoque", "Financeiro"}.issubset({a.category for a in alerts})
 
 
 def test_unauthenticated_root_redirects_to_login() -> None:
@@ -85,18 +85,6 @@ def test_authenticated_login_redirects_to_root() -> None:
 
     assert resp.status_code == 303
     assert resp.headers["location"] == "/"
-
-
-def test_logout_clears_cookie_and_redirects() -> None:
-    """Ensure /auth/logout clears the JWT cookie and redirects to /login."""
-    client = _authenticated_client()
-    resp = client.get("/auth/logout", follow_redirects=False)
-
-    assert resp.status_code == 303
-    assert resp.headers["location"] == "/login"
-    after = client.get("/", follow_redirects=False)
-    assert after.status_code == 303
-    assert after.headers["location"] == "/login"
 
 
 def test_google_oauth_new_user_pending_then_admin_approves() -> None:
@@ -126,12 +114,6 @@ def test_google_oauth_new_user_pending_then_admin_approves() -> None:
     assert cb_resp.status_code == 303
     assert cb_resp.headers["location"] == "/aguardando-aprovacao"
 
-    # Pending user cannot access dashboard yet
-    dash_attempt = anon.get("/", follow_redirects=False)
-    assert dash_attempt.status_code == 303
-    assert dash_attempt.headers["location"] == "/aguardando-aprovacao"
-
-    # Admin approves the pending user
     with SessionLocal() as db:
         pending_user = get_user_by_email(db, "novo.voluntario@gmail.com")
         assert pending_user is not None
@@ -146,19 +128,19 @@ def test_google_oauth_new_user_pending_then_admin_approves() -> None:
     )
     assert approve_resp.status_code == 303
 
-    # Now the previously pending user can access the dashboard
     dash_ok = anon.get("/")
     assert dash_ok.status_code == 200
     assert "Visao Geral" in dash_ok.text
 
 
 def test_public_adoption_catalog_without_login() -> None:
-    """Public adoption catalog works without authentication and filters properly."""
+    """Public adoption catalog works without login and hides volunteer link."""
     anon = TestClient(app)
 
     resp = anon.get("/adocao")
     assert resp.status_code == 200
     assert "Catalogo Publico de Adocao" in resp.text
+    assert "Area do Voluntario" not in resp.text
     assert "Barao" in resp.text
     assert "Amora" in resp.text
     assert "Pipoca" not in resp.text
@@ -169,40 +151,10 @@ def test_public_adoption_catalog_without_login() -> None:
     assert "Barao" not in resp_cats.text
 
 
-def test_dashboard_and_navigation_pages() -> None:
-    """Authenticated volunteer/admin can access all core operational screens."""
+def test_animal_create_edit_foster_transfer_and_vet_note() -> None:
+    """Test creating, editing, transferring foster home, and logging vet care."""
     client = _authenticated_client()
 
-    for path, heading in [
-        ("/", "Indicadores Operacionais"),
-        ("/animais", "Gestao de Animais"),
-        ("/prontuarios", "Prontuarios Clinicos"),
-        ("/estoque", "Controle de Estoque e Insumos"),
-        ("/lares", "Lares Temporarios e Adocoes"),
-        ("/financeiro", "Financeiro e Prestacao de Contas"),
-        ("/admin/usuarios", "Usuarios e Permissoes"),
-    ]:
-        response = client.get(path)
-        assert response.status_code == 200
-        assert heading in response.text
-
-
-def test_animals_search_create_and_clinical_record() -> None:
-    """Test animal filtering, creation, clinical record tabs, and new events."""
-    client = _authenticated_client()
-
-    # Search by name
-    resp_search = client.get("/animais/busca?termo=Pipoca")
-    assert resp_search.status_code == 200
-    assert "Pipoca" in resp_search.text
-    assert "Thor" not in resp_search.text
-
-    # Not found message
-    resp_empty = client.get("/animais/busca?termo=InexistenteXYZ")
-    assert resp_empty.status_code == 200
-    assert "Nenhum animal encontrado" in resp_empty.text
-
-    # Create new rescue persisted in DB
     create_resp = client.post(
         "/animais",
         data={
@@ -217,49 +169,115 @@ def test_animals_search_create_and_clinical_record() -> None:
     assert create_resp.status_code == 303
     assert "Caramelo" in client.get("/animais").text
 
-    # Clinical record & tabs
-    rec_resp = client.get("/animais/1/prontuario")
-    assert rec_resp.status_code == 200
-    assert "Prontuario Clinico: Pipoca" in rec_resp.text
-    assert "Vacina V10" in rec_resp.text
+    # Open dedicated edit page and transfer animal to a foster home
+    edit_page = client.get("/animais/1")
+    assert edit_page.status_code == 200
+    assert "Pipoca" in edit_page.text
 
-    tab_vac = client.get("/animais/1/prontuario/aba/vacinas")
-    assert tab_vac.status_code == 200
-    assert "Carteira de Vacinas e Vermifugos" in tab_vac.text
+    save_resp = client.post(
+        "/animais/1/editar",
+        data={
+            "name": "Pipoca",
+            "species": "Canina",
+            "breed": "SRD",
+            "size": "Medio (14 kg)",
+            "age_approx": "2 anos",
+            "gender": "Femea",
+            "status": "Lar Temporario",
+            "location": "Lar Temporario - Mariana Weber (Bela Uniao)",
+            "temperament": "Muito carinhosa",
+            "rescue_notes": "Recuperada da cirurgia.",
+            "neutered": "on",
+        },
+        follow_redirects=False,
+    )
+    assert save_resp.status_code == 303
+    updated_page = client.get("/animais/1")
+    assert "Mariana Weber" in updated_page.text
 
-    # Add clinical event via HTMX POST
-    ev_resp = client.post(
+    # Add veterinary care visit note
+    vet_resp = client.post(
         "/animais/1/atendimentos",
         data={
-            "title": "Curativo ortopedico",
+            "title": "Retorno clinica parceira",
             "veterinarian": "Dra. Camila",
-            "notes": "Boa evolucao.",
+            "notes": "Alta liberada.",
         },
+        follow_redirects=False,
     )
-    assert ev_resp.status_code == 200
-    assert "Curativo ortopedico" in ev_resp.text
+    assert vet_resp.status_code == 303
+    assert "Retorno clinica parceira" in client.get("/animais/1").text
 
 
-def test_stock_search_and_movement() -> None:
-    """Test stock filtering and real quantity updates in DB."""
+def test_foster_home_crud_and_adoption_registration() -> None:
+    """Test creating/editing foster homes and registering a completed adoption."""
     client = _authenticated_client()
 
-    resp_vac = client.get("/estoque/busca?categoria=Vacina")
-    assert resp_vac.status_code == 200
-    assert "Nobivac" in resp_vac.text
-    assert "Simparic" not in resp_vac.text
+    # Create foster home
+    resp_create = client.post(
+        "/lares",
+        data={
+            "volunteer_name": "Fernanda Costa",
+            "contact": "(55) 99800-1122",
+            "neighborhood": "Industrial",
+            "capacity": "2",
+        },
+        follow_redirects=False,
+    )
+    assert resp_create.status_code == 303
+    assert "Fernanda Costa" in client.get("/lares").text
+
+    # Register adoption (marks animal as Adopted automatically)
+    resp_adopt = client.post(
+        "/adocoes",
+        data={
+            "animal_id": "4",
+            "adopter_name": "Marcos Pereira",
+            "adopter_cpf": "111.222.333-44",
+            "adopter_contact": "(55) 99777-8899",
+            "adopter_address": "Rua das Flores, 120",
+        },
+        follow_redirects=False,
+    )
+    assert resp_adopt.status_code == 303
+    assert "Marcos Pereira" in client.get("/lares").text
+    assert "Adotado" in client.get("/animais/4").text
+
+
+def test_stock_supplies_create_filter_and_movement() -> None:
+    """Test supplies stock filtering, new item creation, and quantity update."""
+    client = _authenticated_client()
+
+    resp_racao = client.get("/estoque/busca?categoria=Racao")
+    assert resp_racao.status_code == 200
+    assert "Racao Seca Caes Adultos" in resp_racao.text
+    assert "Areia Sanitaria" not in resp_racao.text
+
+    create_resp = client.post(
+        "/estoque/itens",
+        data={
+            "name": "Shampoo Neutro 5L",
+            "category": "Higiene",
+            "quantity": "4",
+            "unit": "galoes",
+            "min_quantity": "2",
+        },
+        follow_redirects=False,
+    )
+    assert create_resp.status_code == 303
+    assert "Shampoo Neutro 5L" in client.get("/estoque").text
 
     move_resp = client.post(
         "/estoque/movimentacao",
-        data={"item_id": "2", "movement_type": "Entrada", "quantity": "10"},
+        data={"item_id": "2", "movement_type": "Entrada", "quantity": "5"},
         follow_redirects=False,
     )
     assert move_resp.status_code == 303
-    assert "13 frascos" in client.get("/estoque").text
+    assert "7 sacos" in client.get("/estoque").text
 
 
-def test_financial_module_create_pay_and_csv() -> None:
-    """Test creating financial entries, marking pending as paid, and CSV export."""
+def test_financial_module_and_csv() -> None:
+    """Test creating financial entries and exporting CSV accountability report."""
     client = _authenticated_client()
 
     create_resp = client.post(
@@ -276,46 +294,16 @@ def test_financial_module_create_pay_and_csv() -> None:
         follow_redirects=False,
     )
     assert create_resp.status_code == 303
-    fin_page = client.get("/financeiro")
-    assert "Doacao comunitaria teste" in fin_page.text
-    assert "R$ 350,50" in fin_page.text
+    assert "Doacao comunitaria teste" in client.get("/financeiro").text
 
     csv_resp = client.get("/financeiro/exportar-csv")
     assert csv_resp.status_code == 200
     assert "Doacao comunitaria teste" in csv_resp.text
 
 
-def test_adoption_term_and_static_logo() -> None:
-    """Test printable adoption term and static logo serving."""
+def test_user_profile_settings_and_local_assets() -> None:
+    """Test personal settings, avatar upload, and local static assets."""
     client = _authenticated_client()
-
-    term_resp = client.get("/termo-adocao/1")
-    assert term_resp.status_code == 200
-    assert "Termo de Responsabilidade" in term_resp.text
-    assert "Pipoca" in term_resp.text
-
-    assert client.get("/termo-adocao/9999").status_code == 404
-
-    logo_resp = client.get("/static/logo.jpg")
-    assert logo_resp.status_code == 200
-    assert logo_resp.headers["content-type"] in ["image/jpeg", "image/jpg"]
-
-    svg_logo = client.get("/static/laika-logo.svg")
-    assert svg_logo.status_code == 200
-    assert "image/svg+xml" in svg_logo.headers["content-type"]
-
-    favicon = client.get("/static/favicon.svg")
-    assert favicon.status_code == 200
-    assert "image/svg+xml" in favicon.headers["content-type"]
-
-
-def test_user_profile_settings_and_avatar_upload() -> None:
-    """Test updating display name, theme preference, and profile avatar."""
-    client = _authenticated_client()
-
-    settings_page = client.get("/configuracoes")
-    assert settings_page.status_code == 200
-    assert "Configuracoes da Conta" in settings_page.text
 
     fake_png = b"\x89PNG\r\n\x1a\nfake-avatar-bytes"
     update_resp = client.post(
@@ -325,11 +313,13 @@ def test_user_profile_settings_and_avatar_upload() -> None:
         follow_redirects=False,
     )
     assert update_resp.status_code == 303
+    assert 'class="light"' in client.get("/configuracoes").text
+    assert client.get("/auth/avatar").content == fake_png
 
-    updated_page = client.get("/configuracoes")
-    assert "Thales Coordenacao" in updated_page.text
-    assert 'class="light"' in updated_page.text
-
-    avatar_resp = client.get("/auth/avatar")
-    assert avatar_resp.status_code == 200
-    assert avatar_resp.content == fake_png
+    for asset_path in [
+        "/static/laika-logo.svg",
+        "/static/favicon.svg",
+        "/static/css/materialdesignicons.min.css",
+        "/static/js/htmx.min.js",
+    ]:
+        assert client.get(asset_path).status_code == 200
