@@ -1,0 +1,15 @@
+services:
+  laika:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: laika:local
+    volumes:
+      - ./setrem_estagio_canis:/app/setrem_estagio_canis
+      - ./alembic:/app/alembic
+      - laika_uploads:/tmp/uploads/laika
+    command: ["uvicorn", "setrem_estagio_canis.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    restart: "no"
+
+volumes:
+  laika_uploads:
