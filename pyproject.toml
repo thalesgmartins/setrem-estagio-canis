@@ -28,7 +28,7 @@ where = ["."]
 include = ["setrem_estagio_canis*"]
 
 [project.optional-dependencies]
-dev = ["ruff", "pytest", "pytest-asyncio", "pre-commit"]
+dev = ["ruff", "pytest", "pytest-asyncio", "pre-commit", "httpx2>=2.13.1"]
 
 [tool.ruff]
 line-length = 88
@@ -43,10 +43,11 @@ known-third-party = ["alembic"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+asyncio_default_fixture_loop_scope = "function"
 
 [dependency-groups]
 dev = [
-    "httpx>=0.28.1",
+    "httpx2>=2.13.1",
     "mypy>=2.3.1",
     "pytest>=8.0.0",
     "ruff>=0.11.0",
