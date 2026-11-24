@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-4xl space-y-6">
+
+    <!-- Breadcrumb & Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="space-y-1">
+            <a href="/animais" class="inline-flex items-center gap-1 text-xs text-ink-secondary hover:text-ink-primary">
+                <i class="mdi mdi-arrow-left text-sm"></i>
+                <span>Voltar para Animais</span>
+            </a>
+            <h1 class="text-2xl font-bold tracking-tight text-ink-primary">{{ animal.name }}</h1>
+        </div>
+        <div class="flex items-center gap-2">
+            <a
+                href="/termo-adocao/{{ animal.id }}"
+                target="_blank"
+                class="px-3.5 py-2 rounded-xl bg-elevated hover:bg-subtle border border-subtle text-xs font-medium text-ink-primary inline-flex items-center gap-1.5">
+                <i class="mdi mdi-file-document-outline text-base"></i>
+                <span>Emitir Termo de Adocao</span>
+            </a>
+        </div>
+    </div>
+
+    {% if msg_ok %}
+    <div class="p-3.5 rounded-xl bg-patas-green/15 border border-patas-green/25 text-xs text-patas-green font-medium flex items-center gap-2">
+        <i class="mdi mdi-check-circle-outline text-base"></i>
+        <span>{{ msg_ok }}</span>
+    </div>
+    {% endif %}
+
+    <!-- Main Editable Animal Form -->
+    <form action="/animais/{{ animal.id }}/editar" method="post" class="bg-surface border border-subtle rounded-2xl p-6 space-y-5 text-xs">
+        <div class="flex items-center justify-between pb-3 border-b border-subtle">
+            <h2 class="text-sm font-semibold text-ink-primary">Dados do Animal e Localizacao</h2>
+            <span class="text-[11px] text-ink-muted">Entrada: {{ animal.intake_date }}</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="space-y-1.5">
+                <label class="block font-medium text-ink-secondary">Nome</label>
+                <input type="text" name="name" required value="{{ animal.name }}" class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl text-sm text-ink-primary focus:outline-none focus:border-patas-blue">
+            </div>
+
+            <div class="space-y-1.5">
+                <label class="block font-medium text-ink-secondary">Especie</label>
+                <select name="species" class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl text-sm text-ink-primary focus:outline-none focus:border-patas-blue">
+                    <option value="Canina" {% if animal.species == 'Canina' %}selected{% endif %}>Canina</option>
+                    <option value="Felina" {% if animal.species == 'Felina' %}selected{% endif %}>Felina</option>
+                </select>
+            </div>
+
+            <div class="space-y-1.5">
+                <label class="block font-medium text-ink-secondary">Raca</label>
+                <input type="text" name="breed" value="{{ animal.breed }}" class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl text-sm text-ink-primary focus:outline-none focus:border-patas-blue">
+            </div>
+
+            <div class="space-y-1.5">
+                <label class="block font-medium text-ink-secondary">Porte</label>
+                <input type="text" name="size" value="{{ animal.size }}" class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl text-sm text-ink-primary focus:outline-none focus:border-patas-blue">
+            </div>
+
+            <div class="space-y-1.5">
+                <label class="block font-medium text-ink-secondary">Idade aproximada</label>
+                <input type="text" name="age_approx" value="{{ animal.age_approx }}" class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl text-sm text-ink-primary focus:outline-none focus:border-patas-blue">
+            </div>
+
+            <div class="space-y-1.5">
+                <label class="block font-medium text-ink-secondary">Sexo</label>
+                <select name="gender" class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl text-sm text-ink-primary focus:outline-none focus:border-patas-blue">
+                    <option value="Femea" {% if animal.gender == 'Femea' %}selected{% endif %}>Femea</option>
+                    <option value="Macho" {% if animal.gender == 'Macho' %}selected{% endif %}>Macho</option>
+                    <option value="A avaliar" {% if animal.gender == 'A avaliar' %}selected{% endif %}>A avaliar</option>
+                </select>
+            </div>
+
+            <div class="space-y-1.5">
+                <label class="block font-medium text-ink-secondary">Status</label>
+                <select name="status" class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl text-sm text-ink-primary focus:outline-none focus:border-patas-blue">
+                    {% for st in ['Acolhido', 'Lar Temporario', 'Em Tratamento', 'Disponivel para Adocao', 'Adotado'] %}
+                    <option value="{{ st }}" {% if animal.status == st %}selected{% endif %}>{{ st }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="space-y-1.5 sm:col-span-2">
+                <label class="block font-medium text-ink-secondary">Localizacao / Lar Temporario</label>
+                <input
+                    type="text"
+                    name="location"
+                    list="location-suggestions"
+                    value="{{ animal.location }}"
+                    placeholder="Selecione um lar temporario ou digite o local"
+                    class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl text-sm text-ink-primary focus:outline-none focus:border-patas-blue">
+                <datalist id="location-suggestions">
+                    {% for loc in location_options %}
+                    <option value="{{ loc }}"></option>
+                    {% endfor %}
+                </datalist>
+            </div>
+        </div>
+
+        <label class="inline-flex items-center gap-2.5 cursor-pointer select-none pt-1">
+            <input type="checkbox" name="neutered" {% if animal.neutered %}checked{% endif %} class="w-4 h-4 accent-[#05AC78] rounded">
+            <span class="text-xs font-medium text-ink-primary">Animal castrado</span>
+        </label>
+
+        <div class="space-y-1.5">
+            <label class="block font-medium text-ink-secondary">Temperamento (exibido no catalogo publico de adocao)</label>
+            <input type="text" name="temperament" value="{{ animal.temperament }}" class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl text-sm text-ink-primary focus:outline-none focus:border-patas-blue">
+        </div>
+
+        <div class="space-y-1.5">
+            <label class="block font-medium text-ink-secondary">Observacoes do resgate</label>
+            <textarea rows="2" name="rescue_notes" class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl text-sm text-ink-primary focus:outline-none focus:border-patas-blue">{{ animal.rescue_notes }}</textarea>
+        </div>
+
+        <div class="pt-4 border-t border-subtle flex flex-wrap items-center justify-between gap-3">
+            <button
+                type="submit"
+                formaction="/animais/{{ animal.id }}/excluir"
+                onclick="return confirm('Tem certeza que deseja excluir este cadastro?');"
+                class="px-3.5 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/25 text-red-400 font-medium inline-flex items-center gap-1.5">
+                <i class="mdi mdi-trash-can-outline text-base"></i>
+                <span>Excluir Cadastro</span>
+            </button>
+
+            <button
+                type="submit"
+                class="px-5 py-2.5 rounded-xl bg-patas-green hover:bg-patas-green-hover text-[#061c14] font-semibold inline-flex items-center gap-1.5">
+                <i class="mdi mdi-content-save-outline text-base"></i>
+                <span>Salvar Alteracoes</span>
+            </button>
+        </div>
+    </form>
+
+    <!-- Secondary Section: Vet Visits & Care History -->
+    <section class="bg-surface border border-subtle rounded-2xl p-6 space-y-5">
+        <div class="flex items-center justify-between pb-3 border-b border-subtle">
+            <div>
+                <h2 class="text-sm font-semibold text-ink-primary">Historico de Consultas e Cuidados</h2>
+                <p class="text-xs text-ink-secondary mt-0.5">Registro de idas a clinicas veterinarias parceiras e procedimentos</p>
+            </div>
+        </div>
+
+        <form action="/animais/{{ animal.id }}/atendimentos" method="post" class="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 rounded-xl bg-elevated/60 border border-subtle text-xs">
+            <input type="text" name="title" required placeholder="O que foi feito (ex: Consulta, Castracao)" class="px-3 py-2 bg-surface border border-subtle rounded-lg text-ink-primary placeholder-ink-muted focus:outline-none focus:border-patas-blue">
+            <input type="text" name="veterinarian" required placeholder="Clinica ou veterinario parceiro" class="px-3 py-2 bg-surface border border-subtle rounded-lg text-ink-primary placeholder-ink-muted focus:outline-none focus:border-patas-blue">
+            <button type="submit" class="px-4 py-2 rounded-lg bg-patas-green hover:bg-patas-green-hover text-[#061c14] font-semibold">
+                + Registrar Consulta
+            </button>
+            <textarea rows="2" name="notes" required placeholder="Observacoes da clinica ou orientacoes..." class="sm:col-span-3 px-3 py-2 bg-surface border border-subtle rounded-lg text-ink-primary placeholder-ink-muted focus:outline-none focus:border-patas-blue"></textarea>
+        </form>
+
+        {% if animal.clinical_events %}
+        <div class="divide-y divide-subtle/70 border border-subtle rounded-xl overflow-hidden">
+            {% for ev in animal.clinical_events %}
+            <div class="p-4 flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                <div class="space-y-1">
+                    <p class="text-xs font-semibold text-ink-primary">{{ ev.title }}</p>
+                    <p class="text-xs text-ink-secondary">{{ ev.notes }}</p>
+                    <p class="text-[11px] text-ink-muted">{{ ev.veterinarian }}</p>
+                </div>
+                <span class="font-mono text-xs text-ink-muted tabular shrink-0">{{ ev.date }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-xs text-ink-muted">Nenhuma consulta ou procedimento registrado.</p>
+        {% endif %}
+    </section>
+
+</div>
+{% endblock %}

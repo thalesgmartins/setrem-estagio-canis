@@ -1,24 +1,25 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="space-y-8">
+<div class="space-y-7">
 
-    <!-- Page Heading & Primary Action -->
+    <!-- Page Heading & Clear Primary Actions -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold tracking-tight text-ink-primary">Visao Geral</h1>
             <p class="text-sm text-ink-secondary mt-0.5">
-                Indicadores Operacionais da ONG Patas e Pelos atualizados em tempo real.
+                Resumo operacional de animais, lares, suprimentos e caixa.
             </p>
         </div>
-        <div class="flex items-center gap-2.5">
+        <div class="flex items-center gap-2.5 flex-wrap">
             <button
                 type="button"
-                hx-get="/modais/movimentacao-estoque"
+                hx-get="/modais/novo-lancamento"
                 hx-target="#modal-container"
                 hx-swap="innerHTML"
-                class="px-3.5 py-2 rounded-xl bg-elevated hover:bg-subtle border border-subtle text-xs font-medium text-ink-primary transition-colors">
-                Registrar Entrada/Saida
+                class="px-3.5 py-2 rounded-xl bg-elevated hover:bg-subtle border border-subtle text-xs font-medium text-ink-primary transition-colors inline-flex items-center gap-1.5">
+                <i class="mdi mdi-cash-plus text-base"></i>
+                <span>Novo Lancamento</span>
             </button>
             <button
                 type="button"
@@ -26,199 +27,112 @@
                 hx-target="#modal-container"
                 hx-swap="innerHTML"
                 class="px-4 py-2 rounded-xl bg-patas-green hover:bg-patas-green-hover text-[#061c14] text-xs font-semibold transition-colors inline-flex items-center gap-1.5">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                </svg>
-                <span>Novo Resgate</span>
+                <i class="mdi mdi-plus text-base"></i>
+                <span>Cadastrar Animal</span>
             </button>
         </div>
     </div>
 
-    <!-- Top KPI Row (4 Modular Cards) -->
+    <!-- 4 Focused KPIs -->
     <section aria-label="Indicadores Operacionais" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <!-- KPI 1: Animais Acolhidos (Neutral / White) -->
-        <div class="bg-surface border border-subtle rounded-xl p-5 flex flex-col justify-between gap-4">
+        <a href="/animais" class="bg-surface border border-subtle hover:border-[#3f3f3f] rounded-xl p-5 flex flex-col justify-between gap-4 transition-colors">
             <div class="flex items-center justify-between">
                 <span class="text-xs font-medium text-ink-secondary">Animais Acolhidos</span>
                 <span class="w-8 h-8 rounded-lg bg-elevated border border-subtle flex items-center justify-center text-ink-primary">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                    </svg>
+                    <i class="mdi mdi-paw text-base"></i>
                 </span>
             </div>
             <div>
                 <p class="text-3xl font-bold text-ink-primary tabular tracking-tight">{{ metrics.total_animals }}</p>
                 <p class="text-xs text-ink-secondary mt-1 tabular">
-                    {{ metrics.dogs_count }} caes e {{ metrics.cats_count }} gatos registrados
+                    {{ metrics.dogs_count }} caes · {{ metrics.cats_count }} gatos
                 </p>
             </div>
-        </div>
+        </a>
 
-        <!-- KPI 2: Em Lar Temporario (Informative Blue #5e7dfc) -->
-        <div class="bg-surface border border-subtle rounded-xl p-5 flex flex-col justify-between gap-4">
+        <a href="/animais" class="bg-surface border border-subtle hover:border-[#3f3f3f] rounded-xl p-5 flex flex-col justify-between gap-4 transition-colors">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-medium text-ink-secondary">Disponiveis p/ Adocao</span>
+                <span class="w-8 h-8 rounded-lg bg-patas-green/15 border border-patas-green/25 flex items-center justify-center text-patas-green">
+                    <i class="mdi mdi-heart-outline text-base"></i>
+                </span>
+            </div>
+            <div>
+                <p class="text-3xl font-bold text-ink-primary tabular tracking-tight">{{ metrics.available_count }}</p>
+                <p class="text-xs text-patas-green mt-1">Visiveis no catalogo publico</p>
+            </div>
+        </a>
+
+        <a href="/lares" class="bg-surface border border-subtle hover:border-[#3f3f3f] rounded-xl p-5 flex flex-col justify-between gap-4 transition-colors">
             <div class="flex items-center justify-between">
                 <span class="text-xs font-medium text-ink-secondary">Em Lar Temporario</span>
                 <span class="w-8 h-8 rounded-lg bg-patas-blue/15 border border-patas-blue/25 flex items-center justify-center text-patas-blue">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75" />
-                    </svg>
+                    <i class="mdi mdi-home-heart text-base"></i>
                 </span>
             </div>
             <div>
                 <p class="text-3xl font-bold text-ink-primary tabular tracking-tight">{{ metrics.in_foster_count }}</p>
-                <p class="text-xs text-patas-blue mt-1">
-                    {{ foster_homes|length }} lares voluntarios cadastrados
-                </p>
+                <p class="text-xs text-patas-blue mt-1">{{ foster_homes|length }} lares cadastrados</p>
             </div>
-        </div>
+        </a>
 
-        <!-- KPI 3: Alertas de Estoque / Validade (Attention Orange #ff9d01) -->
-        <div class="bg-surface border border-subtle rounded-xl p-5 flex flex-col justify-between gap-4">
+        <a href="/financeiro" class="bg-surface border border-subtle hover:border-[#3f3f3f] rounded-xl p-5 flex flex-col justify-between gap-4 transition-colors">
             <div class="flex items-center justify-between">
-                <span class="text-xs font-medium text-ink-secondary">Alertas de Estoque/Validade</span>
-                <span class="w-8 h-8 rounded-lg bg-patas-orange/15 border border-patas-orange/25 flex items-center justify-center text-patas-orange">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-                    </svg>
-                </span>
-            </div>
-            <div>
-                <p class="text-3xl font-bold text-ink-primary tabular tracking-tight">{{ metrics.stock_alerts_count }}</p>
-                <p class="text-xs text-patas-orange mt-1 tabular">
-                    {{ metrics.critical_stock_count }} criticos · {{ metrics.vaccines_due }} vacinas pendentes
-                </p>
-            </div>
-        </div>
-
-        <!-- KPI 4: Adocoes Concluidas (Primary Green #05AC78) -->
-        <div class="bg-surface border border-subtle rounded-xl p-5 flex flex-col justify-between gap-4">
-            <div class="flex items-center justify-between">
-                <span class="text-xs font-medium text-ink-secondary">Adocoes Concluidas</span>
+                <span class="text-xs font-medium text-ink-secondary">Saldo em Caixa</span>
                 <span class="w-8 h-8 rounded-lg bg-patas-green/15 border border-patas-green/25 flex items-center justify-center text-patas-green">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                    <i class="mdi mdi-cash-multiple text-base"></i>
                 </span>
             </div>
             <div>
-                <p class="text-3xl font-bold text-ink-primary tabular tracking-tight">{{ metrics.adoptions_count }}</p>
-                <p class="text-xs text-patas-green mt-1">
-                    Termo assinado e pos-adocao ativo
+                <p class="text-2xl font-bold font-mono text-ink-primary tabular tracking-tight">{{ fin_summary.balance_brl }}</p>
+                <p class="text-xs text-patas-orange mt-1 tabular">
+                    Pendente: {{ fin_summary.pending_expense_brl }}
                 </p>
             </div>
-        </div>
+        </a>
     </section>
 
-    <!-- Central 2-Column Operational Panels -->
-    <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-        <!-- Left Panel: Priority Alerts -->
-        <div class="bg-surface border border-subtle rounded-xl flex flex-col">
-            <div class="px-5 py-4 border-b border-subtle flex items-center justify-between gap-3">
-                <div>
-                    <h2 class="text-sm font-semibold text-ink-primary">Alertas Prioritarios</h2>
-                    <p class="text-xs text-ink-secondary mt-0.5">Insumos criticos, validades proximas e vacinas pendentes</p>
-                </div>
-                <span class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-patas-orange/15 text-patas-orange border border-patas-orange/25 tabular">
-                    {{ alerts|length }} pendentes
-                </span>
+    <!-- Priority Alerts (Stock & Clinic Bills) -->
+    {% if alerts %}
+    <section class="bg-surface border border-subtle rounded-xl">
+        <div class="px-5 py-4 border-b border-subtle flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+                <i class="mdi mdi-alert-outline text-patas-orange text-lg"></i>
+                <h2 class="text-sm font-semibold text-ink-primary">Alertas e Pendencias</h2>
             </div>
-
-            <div class="divide-y divide-subtle/70 flex-1">
-                {% for alert in alerts %}
-                <div class="px-5 py-3.5 flex items-center justify-between gap-4 hover:bg-elevated/50 transition-colors">
-                    <div class="min-w-0 space-y-1">
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold {% if alert.severity == 'critical' %}bg-red-500/15 text-red-400 border border-red-500/25{% else %}bg-patas-orange/15 text-patas-orange border border-patas-orange/25{% endif %}">
-                                {{ alert.badge }}
-                            </span>
-                            <p class="text-xs font-semibold text-ink-primary truncate">{{ alert.title }}</p>
-                        </div>
-                        <p class="text-xs text-ink-secondary font-mono truncate">{{ alert.subtitle }}</p>
-                    </div>
-                    <div class="shrink-0">
-                        {% if alert.use_htmx %}
-                        <button
-                            type="button"
-                            hx-get="{{ alert.action_url }}"
-                            hx-target="#modal-container"
-                            hx-swap="innerHTML"
-                            class="px-3 py-1.5 rounded-lg bg-elevated hover:bg-subtle border border-subtle text-xs font-medium text-ink-primary transition-colors">
-                            {{ alert.action_label }}
-                        </button>
-                        {% else %}
-                        <a
-                            href="{{ alert.action_url }}"
-                            class="inline-block px-3 py-1.5 rounded-lg bg-elevated hover:bg-subtle border border-subtle text-xs font-medium text-ink-primary transition-colors">
-                            {{ alert.action_label }}
-                        </a>
-                        {% endif %}
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
+            <span class="px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-patas-orange/15 text-patas-orange border border-patas-orange/25 tabular">
+                {{ alerts|length }}
+            </span>
         </div>
 
-        <!-- Right Panel: Recent Operational Activity -->
-        <div class="bg-surface border border-subtle rounded-xl flex flex-col">
-            <div class="px-5 py-4 border-b border-subtle flex items-center justify-between gap-3">
-                <div>
-                    <h2 class="text-sm font-semibold text-ink-primary">Movimentacoes Recentes</h2>
-                    <p class="text-xs text-ink-secondary mt-0.5">Ultimos resgates, evolucoes clinicas e termos emitidos</p>
+        <div class="divide-y divide-subtle/70">
+            {% for alert in alerts %}
+            <div class="px-5 py-3.5 flex items-center justify-between gap-4 hover:bg-elevated/40 transition-colors">
+                <div class="min-w-0 space-y-0.5">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold {% if alert.severity == 'critical' %}bg-red-500/15 text-red-400 border border-red-500/25{% else %}bg-patas-orange/15 text-patas-orange border border-patas-orange/25{% endif %}">
+                            {{ alert.badge }}
+                        </span>
+                        <p class="text-xs font-semibold text-ink-primary truncate">{{ alert.title }}</p>
+                    </div>
+                    <p class="text-xs text-ink-secondary truncate">{{ alert.subtitle }}</p>
                 </div>
-                <a href="/animais" class="text-xs font-medium text-patas-blue hover:underline">
-                    Ver todos
+                <a href="{{ alert.action_url }}" class="px-3 py-1.5 rounded-lg bg-elevated hover:bg-subtle border border-subtle text-xs font-medium text-ink-primary shrink-0">
+                    {{ alert.action_label }}
                 </a>
             </div>
-
-            <div class="divide-y divide-subtle/70 flex-1">
-                {% for act in activities %}
-                <div class="px-5 py-3.5 flex items-center justify-between gap-4 hover:bg-elevated/50 transition-colors">
-                    <div class="min-w-0 space-y-1">
-                        <div class="flex items-center gap-2">
-                            <span class="text-[11px] font-mono text-ink-muted tabular">{{ act.timestamp }}</span>
-                            <span class="text-ink-muted">·</span>
-                            <span class="text-[11px] font-semibold {% if act.category == 'Adocao' %}text-patas-green{% elif act.category == 'Estoque' %}text-patas-orange{% else %}text-patas-blue{% endif %}">
-                                {{ act.category }}
-                            </span>
-                        </div>
-                        <p class="text-xs font-semibold text-ink-primary truncate">{{ act.title }}</p>
-                        <p class="text-xs text-ink-secondary truncate">{{ act.detail }}</p>
-                    </div>
-                    <div class="shrink-0">
-                        {% if act.use_htmx %}
-                        <button
-                            type="button"
-                            hx-get="{{ act.action_url }}"
-                            hx-target="#modal-container"
-                            hx-swap="innerHTML"
-                            class="px-3 py-1.5 rounded-lg bg-elevated hover:bg-subtle border border-subtle text-xs font-medium text-ink-primary transition-colors">
-                            {{ act.action_label }}
-                        </button>
-                        {% else %}
-                        <a
-                            href="{{ act.action_url }}"
-                            {% if 'termo-adocao' in act.action_url %}target="_blank"{% endif %}
-                            class="inline-block px-3 py-1.5 rounded-lg bg-elevated hover:bg-subtle border border-subtle text-xs font-medium text-ink-primary transition-colors">
-                            {{ act.action_label }}
-                        </a>
-                        {% endif %}
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
+            {% endfor %}
         </div>
     </section>
+    {% endif %}
 
-    <!-- Quick Preview: Animals under Care -->
-    <section class="space-y-4">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div>
-                <h2 class="text-base font-semibold text-ink-primary">Acompanhamento de Animais</h2>
-                <p class="text-xs text-ink-secondary">Acesso rapido aos prontuarios ativos e emissao de termos</p>
-            </div>
-            <a href="/animais" class="text-xs font-medium text-patas-blue hover:underline">
-                Abrir diretorio completo
+    <!-- Recent Animals -->
+    <section class="space-y-3">
+        <div class="flex items-center justify-between">
+            <h2 class="text-base font-semibold text-ink-primary">Animais Recentes</h2>
+            <a href="/animais" class="text-xs font-medium text-patas-blue hover:underline inline-flex items-center gap-1">
+                <span>Ver todos</span>
+                <i class="mdi mdi-arrow-right text-sm"></i>
             </a>
         </div>
         {% include "fragments/animal_table.html" %}

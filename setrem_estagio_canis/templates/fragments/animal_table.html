@@ -8,7 +8,7 @@
                     <th scope="col" class="px-4 py-3.5 text-left font-semibold">Especie / Porte</th>
                     <th scope="col" class="px-4 py-3.5 text-left font-semibold">Localizacao Atual</th>
                     <th scope="col" class="px-4 py-3.5 text-left font-semibold">Castracao</th>
-                    <th scope="col" class="px-4 py-3.5 text-left font-semibold">Status Clinico</th>
+                    <th scope="col" class="px-4 py-3.5 text-left font-semibold">Status</th>
                     <th scope="col" class="px-5 py-3.5 text-right font-semibold">Acoes</th>
                 </tr>
             </thead>
@@ -16,27 +16,24 @@
                 {% for animal in animals %}
                 <tr class="hover:bg-elevated/50 transition-colors">
                     <td class="px-5 py-3.5">
-                        <div class="flex items-center gap-3">
+                        <a href="/animais/{{ animal.id }}" class="flex items-center gap-3 group">
                             <div class="w-9 h-9 rounded-xl bg-elevated border border-subtle flex items-center justify-center text-xs font-bold text-ink-primary shrink-0">
                                 {{ animal.name[:2]|upper }}
                             </div>
                             <div class="min-w-0">
-                                <p class="font-semibold text-ink-primary truncate">{{ animal.name }}</p>
+                                <p class="font-semibold text-ink-primary group-hover:text-patas-green transition-colors truncate">{{ animal.name }}</p>
                                 <p class="text-xs text-ink-muted tabular">
-                                    {{ animal.age_approx }} · {{ animal.gender }} · Entrada {{ animal.intake_date }}
+                                    {{ animal.age_approx }} · {{ animal.gender }}
                                 </p>
                             </div>
-                        </div>
+                        </a>
                     </td>
                     <td class="px-4 py-3.5">
                         <span class="text-xs font-medium text-ink-primary">{{ animal.species }}</span>
                         <span class="block text-xs text-ink-secondary mt-0.5">{{ animal.breed }} · {{ animal.size }}</span>
                     </td>
-                    <td class="px-4 py-3.5 text-xs text-ink-secondary max-w-[240px]">
+                    <td class="px-4 py-3.5 text-xs text-ink-secondary max-w-[260px]">
                         <span class="block truncate" title="{{ animal.location }}">{{ animal.location }}</span>
-                        {% if animal.microchip %}
-                        <span class="block text-[11px] font-mono text-ink-muted tabular mt-0.5">Chip {{ animal.microchip }}</span>
-                        {% endif %}
                     </td>
                     <td class="px-4 py-3.5 whitespace-nowrap">
                         {% if animal.neutered %}
@@ -52,45 +49,35 @@
                     <td class="px-4 py-3.5 whitespace-nowrap">
                         {% if animal.status == 'Em Tratamento' %}
                         <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-patas-orange/15 text-patas-orange border border-patas-orange/25">
-                            <span class="w-1.5 h-1.5 rounded-full bg-patas-orange"></span>
                             Em Tratamento
                         </span>
                         {% elif animal.status == 'Lar Temporario' %}
                         <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-patas-blue/15 text-patas-blue border border-patas-blue/25">
-                            <span class="w-1.5 h-1.5 rounded-full bg-patas-blue"></span>
                             Lar Temporario
                         </span>
-                        {% elif animal.status == 'Disponivel para Adocao' %}
+                        {% elif animal.status in ['Disponivel para Adocao', 'Adotado'] %}
                         <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-patas-green/15 text-patas-green border border-patas-green/25">
-                            <span class="w-1.5 h-1.5 rounded-full bg-patas-green"></span>
-                            Pronto para Adocao
-                        </span>
-                        {% elif animal.status == 'Adotado' %}
-                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-patas-green/15 text-patas-green border border-patas-green/25">
-                            <span class="w-1.5 h-1.5 rounded-full bg-patas-green"></span>
-                            Adotado
+                            {{ animal.status }}
                         </span>
                         {% else %}
                         <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-elevated text-ink-secondary border border-subtle">
-                            <span class="w-1.5 h-1.5 rounded-full bg-ink-secondary"></span>
                             {{ animal.status }}
                         </span>
                         {% endif %}
                     </td>
-                    <td class="px-5 py-3.5 text-right whitespace-nowrap space-x-2">
-                        <button
-                            type="button"
-                            hx-get="/animais/{{ animal.id }}/prontuario"
-                            hx-target="#modal-container"
-                            hx-swap="innerHTML"
-                            class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-patas-green hover:bg-patas-green-hover text-[#061c14] transition-colors">
-                            Prontuario
-                        </button>
+                    <td class="px-5 py-3.5 text-right whitespace-nowrap space-x-1.5">
+                        <a
+                            href="/animais/{{ animal.id }}"
+                            class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg bg-patas-green hover:bg-patas-green-hover text-[#061c14] transition-colors">
+                            <i class="mdi mdi-pencil-outline text-sm"></i>
+                            <span>Gerenciar</span>
+                        </a>
                         <a
                             href="/termo-adocao/{{ animal.id }}"
                             target="_blank"
-                            class="inline-block px-3 py-1.5 text-xs font-medium rounded-lg bg-elevated hover:bg-subtle text-ink-primary border border-subtle transition-colors">
-                            Termo
+                            class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-lg bg-elevated hover:bg-subtle text-ink-primary border border-subtle transition-colors">
+                            <i class="mdi mdi-file-document-outline text-sm"></i>
+                            <span>Termo</span>
                         </a>
                     </td>
                 </tr>
@@ -102,6 +89,6 @@
 {% else %}
 <div class="bg-surface border border-subtle rounded-xl p-10 text-center space-y-1">
     <p class="text-sm font-medium text-ink-primary">Nenhum animal encontrado para o filtro informado.</p>
-    <p class="text-xs text-ink-secondary">Ajuste o termo de busca ou limpe o filtro de status.</p>
+    <p class="text-xs text-ink-secondary">Ajuste o termo de busca ou cadastre um novo animal.</p>
 </div>
 {% endif %}

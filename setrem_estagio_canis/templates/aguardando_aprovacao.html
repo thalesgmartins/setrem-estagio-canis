@@ -5,34 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aguardando Aprovacao — Laika</title>
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/css/tailwind.min.css">
+    <link rel="stylesheet" href="/static/css/materialdesignicons.min.css">
 </head>
-<body class="bg-[#121212] text-[#f5f5f5] min-h-screen flex items-center justify-center p-6 font-sans antialiased">
-    <main class="w-full max-w-md bg-[#1e1e1e] border border-[#2e2e2e] rounded-2xl p-8 space-y-6 text-center">
-        <div class="w-12 h-12 mx-auto rounded-xl bg-[#ff9d01]/15 border border-[#ff9d01]/30 flex items-center justify-center text-[#ff9d01]">
-            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+<body class="bg-canvas text-ink-primary min-h-screen flex items-center justify-center p-6 font-sans antialiased">
+    <main class="w-full max-w-md bg-surface border border-subtle rounded-2xl p-8 space-y-6 text-center">
+        <div class="w-12 h-12 mx-auto rounded-xl bg-patas-orange/15 border border-patas-orange/30 flex items-center justify-center text-patas-orange">
+            <i class="mdi mdi-clock-outline text-2xl"></i>
         </div>
 
         <div class="space-y-2">
             <h1 class="text-xl font-bold tracking-tight">Acesso aguardando aprovacao</h1>
-            <p class="text-sm text-[#a0a0a0] leading-relaxed">
-                Ola, <strong class="text-[#f5f5f5]">{{ current_user.nome }}</strong> ({{ current_user.email }}).
-                Sua conta foi registrada, mas apenas voluntarios liberados pela Coordenacao da ONG Patas e Pelos podem acessar o painel interno.
+            <p class="text-sm text-ink-secondary leading-relaxed">
+                Ola, <strong class="text-ink-primary">{{ current_user.nome }}</strong> ({{ current_user.email }}).
+                Sua conta foi registrada e aguarda liberacao da Coordenacao para acessar o painel interno.
             </p>
         </div>
 
         <div class="pt-2 flex flex-col gap-2.5">
             <a href="/adocao"
-               class="w-full py-2.5 px-4 rounded-xl bg-[#05AC78] hover:bg-[#049366] text-[#061c14] text-xs font-semibold transition-colors">
+               class="w-full py-2.5 px-4 rounded-xl bg-patas-green hover:bg-patas-green-hover text-[#061c14] text-xs font-semibold transition-colors">
                 Ver Catalogo Publico de Adocao
             </a>
             <a href="/auth/logout"
-               class="w-full py-2.5 px-4 rounded-xl bg-[#252525] hover:bg-[#2e2e2e] border border-[#2e2e2e] text-xs font-medium text-[#f5f5f5] transition-colors">
+               class="w-full py-2.5 px-4 rounded-xl bg-elevated hover:bg-subtle border border-subtle text-xs font-medium text-ink-primary transition-colors">
                 Sair e trocar de conta
             </a>
         </div>

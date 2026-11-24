@@ -1,4 +1,4 @@
-"""Web routes rendering Jinja2 pages and HTMX fragments for Canis."""
+"""Web routes rendering Jinja2 pages and HTMX fragments for Laika."""
 
 import csv
 import io
@@ -30,9 +30,15 @@ from setrem_estagio_canis.database.models import (
 from setrem_estagio_canis.database.repository import (
     add_clinical_event,
     calculate_financial_summary,
+    create_adoption_record,
     create_animal,
     create_financial_transaction,
+    create_stock_item,
+    create_temporary_home,
+    delete_animal,
+    delete_temporary_home,
     get_animal_by_id,
+    get_temporary_home_by_id,
     list_adoptable_animals,
     list_adoptions,
     list_animals,
@@ -42,6 +48,8 @@ from setrem_estagio_canis.database.repository import (
     list_users,
     mark_transaction_paid,
     register_stock_movement,
+    update_animal,
+    update_temporary_home,
 )
 from setrem_estagio_canis.database.session import get_db
 
@@ -66,46 +74,33 @@ class OperationalAlert:
     use_htmx: bool = False
 
 
-@dataclass
-class ActivityItem:
-    """Recent operational event displayed on the dashboard."""
-
-    timestamp: str
-    category: str
-    title: str
-    detail: str
-    action_label: str
-    action_url: str
-    use_htmx: bool = False
-
-
 def calculate_metrics(animals: list[Animal], stock: list[StockItem]) -> dict[str, int]:
     """Calculate operational key indicators for the dashboard."""
     dogs = sum(1 for a in animals if a.species.lower() == "canina")
     cats = sum(1 for a in animals if a.species.lower() == "felina")
     in_foster = sum(1 for a in animals if a.status == "Lar Temporario")
+    available = sum(1 for a in animals if a.status == "Disponivel para Adocao")
     adopted = sum(1 for a in animals if a.status == "Adotado")
     critical_stock = sum(1 for s in stock if s.status == "Estoque Critico")
-    expiring_stock = sum(1 for s in stock if s.status == "Vencendo em breve")
-    vaccines_due = sum(1 for a in animals for v in a.vaccines if v.status == "Pendente")
 
     return {
         "total_animals": len(animals),
         "dogs_count": dogs,
         "cats_count": cats,
+        "available_count": available,
         "active_foster_homes": in_foster,
         "in_foster_count": in_foster,
-        "vaccines_due": vaccines_due,
         "critical_stock_count": critical_stock,
-        "stock_alerts_count": critical_stock + expiring_stock,
+        "stock_alerts_count": critical_stock,
         "adoptions_count": adopted,
     }
 
 
 def get_priority_alerts(
-    animals: list[Animal], stock: list[StockItem]
+    stock: list[StockItem],
+    transactions: list[FinancialTransaction] | None = None,
 ) -> list[OperationalAlert]:
-    """Build prioritized alerts for expiring stock, low stock, and pending vaccines."""
+    """Build operational alerts for low stock and pending clinic bills."""
     alerts: list[OperationalAlert] = []
     for item in stock:
         if item.status == "Estoque Critico":
@@ -114,92 +109,32 @@ def get_priority_alerts(
                     id=f"stock-{item.id}",
                     title=item.name,
                     subtitle=(
-                        f"Lote {item.lot_number} | Saldo: {item.quantity} "
-                        f"{item.unit} (min. {item.min_quantity})"
+                        f"Saldo: {item.quantity} {item.unit} "
+                        f"(minimo: {item.min_quantity} {item.unit})"
                     ),
                     badge="Estoque Baixo",
                     severity="critical",
                     category="Estoque",
-                    action_label="Ver Lote",
+                    action_label="Repor",
                     action_url="/estoque",
                 )
             )
-        elif item.status == "Vencendo em breve":
+
+    for tx in transactions or []:
+        if tx.tx_type == "Saida" and tx.status == "Pendente":
             alerts.append(
                 OperationalAlert(
-                    id=f"exp-{item.id}",
-                    title=item.name,
-                    subtitle=(
-                        f"Lote {item.lot_number} | Validade: {item.expiration_date} "
-                        f"| {item.quantity} {item.unit}"
-                    ),
-                    badge="Vencimento < 30d",
+                    id=f"fin-{tx.id}",
+                    title=tx.description,
+                    subtitle=f"{tx.category} · {tx.amount_brl}",
+                    badge="Conta Pendente",
                     severity="warning",
-                    category="Validade",
-                    action_label="Ver Estoque",
-                    action_url="/estoque",
+                    category="Financeiro",
+                    action_label="Ver Financeiro",
+                    action_url="/financeiro",
                 )
             )
-
-    for animal in animals:
-        for vac in animal.vaccines:
-            if vac.status == "Pendente":
-                alerts.append(
-                    OperationalAlert(
-                        id=f"vac-{animal.id}-{vac.lot}",
-                        title=f"Reforco de {vac.name} - {animal.name}",
-                        subtitle=(
-                            f"Previsto para {vac.next_due_date} | {animal.location}"
-                        ),
-                        badge="Vacina Pendente",
-                        severity="warning",
-                        category="Clinica",
-                        action_label="Abrir Prontuario",
-                        action_url=f"/animais/{animal.id}/prontuario",
-                        use_htmx=True,
-                    )
-                )
     return alerts
-
-
-def _get_recent_activities() -> list[ActivityItem]:
-    """Return recent NGO operational highlights for the dashboard feed."""
-    return [
-        ActivityItem(
-            timestamp="24/09 · 14:30",
-            category="Prontuario",
-            title="Reavaliacao ortopedica registrada para Pipoca",
-            detail="Dra. Camila Ferreira atualizou dosagem de Meloxicam 2mg.",
-            action_label="Prontuario",
-            action_url="/animais/1/prontuario",
-            use_htmx=True,
-        ),
-        ActivityItem(
-            timestamp="21/09 · 10:15",
-            category="Resgate",
-            title="Entrada de Mel no Gatil Central - Modulo B",
-            detail="Teste rapido FIV/FeLV negativo e 1a dose V4 aplicada.",
-            action_label="Prontuario",
-            action_url="/animais/3/prontuario",
-            use_htmx=True,
-        ),
-        ActivityItem(
-            timestamp="15/09 · 16:40",
-            category="Adocao",
-            title="Termo de adocao emitido para Luna",
-            detail="Adotante: Ana Paula de Souza · Acompanhamento ativo.",
-            action_label="Ver Termo",
-            action_url="/termo-adocao/5",
-        ),
-        ActivityItem(
-            timestamp="20/09 · 11:00",
-            category="Financeiro",
-            title="Fatura pendente na Clinica Parceira (Pipoca)",
-            detail="Valor: R$ 680,00 · Cirurgia ortopedica e internacao.",
-            action_label="Financeiro",
-            action_url="/financeiro",
-        ),
-    ]
 
 
 def _auth_gate(
@@ -245,6 +180,20 @@ def _parse_amount_to_cents(raw_value: str) -> int:
             status_code=400, detail="Valor financeiro invalido."
         ) from exc
     return max(0, round(value * 100))
+
+
+def _location_options(db: Session) -> list[str]:
+    """Build standard selectable locations combining HQ spaces and foster homes."""
+    base = [
+        "Canil Central",
+        "Gatil Central",
+        "Clinica Veterinaria Parceira",
+    ]
+    homes = [
+        f"Lar Temporario - {h.volunteer_name} ({h.neighborhood})"
+        for h in list_temporary_homes(db)
+    ]
+    return base + homes
 
 
 # ---------------------------------------------------------------------------
@@ -345,10 +294,9 @@ def index(
     animals = list_animals(db)
     stock_items = list_stock(db)
     foster_homes = list_temporary_homes(db)
-    adoptions = list_adoptions(db)
     transactions = list_financial_transactions(db)
     metrics = calculate_metrics(animals, stock_items)
-    alerts = get_priority_alerts(animals, stock_items)
+    alerts = get_priority_alerts(stock_items, transactions)
     fin_summary = calculate_financial_summary(transactions)
 
     return templates.TemplateResponse(
@@ -357,12 +305,9 @@ def index(
         context={
             **_base_context(user, "dashboard", "Visao Geral"),
             "metrics": metrics,
-            "animals": animals,
-            "stock_items": stock_items,
+            "animals": animals[:5],
             "foster_homes": foster_homes,
-            "adoptions": adoptions,
             "alerts": alerts,
-            "activities": _get_recent_activities(),
             "fin_summary": fin_summary,
         },
     )
@@ -384,6 +329,7 @@ def animals_page(
         context={
             **_base_context(user, "animais", "Animais"),
             "animals": list_animals(db),
+            "msg_ok": request.query_params.get("ok"),
         },
     )
 
@@ -397,6 +343,12 @@ def create_animal_route(
     size: Annotated[str, Form()],
     location: Annotated[str, Form()],
     rescue_notes: Annotated[str, Form()],
+    breed: Annotated[str, Form()] = "Sem Raca Definida (SRD)",
+    age_approx: Annotated[str, Form()] = "A avaliar",
+    gender: Annotated[str, Form()] = "A avaliar",
+    status: Annotated[str, Form()] = "Acolhido",
+    neutered: Annotated[str | None, Form()] = None,
+    temperament: Annotated[str, Form()] = "",
 ) -> RedirectResponse:
     """Persist a new rescued animal and redirect to the animals directory."""
     user, redirect = _auth_gate(request, db)
@@ -410,28 +362,160 @@ def create_animal_route(
         size=size,
         location=location,
         rescue_notes=rescue_notes,
+        breed=breed,
+        age_approx=age_approx,
+        gender=gender,
+        status=status,
+        neutered=neutered == "on",
+        temperament=temperament,
     )
-    return RedirectResponse(url="/animais", status_code=303)
+    return RedirectResponse(url="/animais?ok=Animal+cadastrado", status_code=303)
 
 
-@router.get("/prontuarios", response_model=None)
-def records_page(
+@router.get("/animais/busca", response_class=HTMLResponse)
+def search_animals(
+    request: Request,
+    db: Annotated[Session, Depends(get_db)],
+    termo: str = "",
+    status_filtro: str = "",
+) -> HTMLResponse:
+    """Filter animals dynamically using HTMX partial requests."""
+    user, _ = _auth_gate(request, db)
+    if user is None:
+        raise HTTPException(status_code=401, detail="Nao autenticado.")
+
+    filtered = list_animals(db, query=termo, status_filter=status_filtro)
+    return templates.TemplateResponse(
+        request=request,
+        name="fragments/animal_table.html",
+        context={"animals": filtered},
+    )
+
+
+@router.get("/animais/{animal_id}", response_model=None)
+def animal_detail_page(
+    animal_id: int,
     request: Request,
     db: Annotated[Session, Depends(get_db)],
 ) -> HTMLResponse | RedirectResponse:
-    """Render the clinical records overview screen."""
+    """Render full editable management page for a single animal."""
     user, redirect = _auth_gate(request, db)
     if redirect is not None or user is None:
         return redirect or RedirectResponse(url="/login", status_code=303)
 
+    animal = get_animal_by_id(db, animal_id)
+    if animal is None:
+        raise HTTPException(status_code=404, detail="Animal nao encontrado.")
+
     return templates.TemplateResponse(
         request=request,
-        name="prontuarios.html",
+        name="animal_editar.html",
         context={
-            **_base_context(user, "prontuarios", "Prontuarios"),
-            "animals": list_animals(db),
+            **_base_context(user, "animais", f"Animal · {animal.name}"),
+            "animal": animal,
+            "location_options": _location_options(db),
+            "msg_ok": request.query_params.get("ok"),
         },
     )
+
+
+@router.post("/animais/{animal_id}/editar")
+def edit_animal_route(
+    animal_id: int,
+    request: Request,
+    db: Annotated[Session, Depends(get_db)],
+    name: Annotated[str, Form()],
+    species: Annotated[str, Form()],
+    breed: Annotated[str, Form()],
+    size: Annotated[str, Form()],
+    age_approx: Annotated[str, Form()],
+    gender: Annotated[str, Form()],
+    status: Annotated[str, Form()],
+    location: Annotated[str, Form()],
+    temperament: Annotated[str, Form()] = "",
+    rescue_notes: Annotated[str, Form()] = "",
+    neutered: Annotated[str | None, Form()] = None,
+) -> RedirectResponse:
+    """Save edits to an animal (including foster home / status transfer)."""
+    user, redirect = _auth_gate(request, db)
+    if redirect is not None or user is None:
+        return redirect or RedirectResponse(url="/login", status_code=303)
+
+    updated = update_animal(
+        db=db,
+        animal_id=animal_id,
+        updates={
+            "name": name,
+            "species": species,
+            "breed": breed,
+            "size": size,
+            "age_approx": age_approx,
+            "gender": gender,
+            "status": status,
+            "location": location,
+            "temperament": temperament,
+            "rescue_notes": rescue_notes,
+            "neutered": neutered == "on",
+        },
+    )
+    if updated is None:
+        raise HTTPException(status_code=404, detail="Animal nao encontrado.")
+
+    return RedirectResponse(
+        url=f"/animais/{animal_id}?ok=Alteracoes+salvas",
+        status_code=303,
+    )
+
+
+@router.post("/animais/{animal_id}/excluir")
+def delete_animal_route(
+    animal_id: int,
+    request: Request,
+    db: Annotated[Session, Depends(get_db)],
+) -> RedirectResponse:
+    """Remove an animal record and redirect back to the animals directory."""
+    user, redirect = _auth_gate(request, db)
+    if redirect is not None or user is None:
+        return redirect or RedirectResponse(url="/login", status_code=303)
+
+    delete_animal(db, animal_id)
+    return RedirectResponse(url="/animais?ok=Registro+removido", status_code=303)
+
+
+@router.post("/animais/{animal_id}/atendimentos")
+def add_clinical_event_route(
+    request: Request,
+    animal_id: int,
+    db: Annotated[Session, Depends(get_db)],
+    title: Annotated[str, Form()],
+    veterinarian: Annotated[str, Form()],
+    notes: Annotated[str, Form()],
+) -> RedirectResponse:
+    """Persist a veterinary visit or care note and reload the animal page."""
+    user, redirect = _auth_gate(request, db)
+    if redirect is not None or user is None:
+        return redirect or RedirectResponse(url="/login", status_code=303)
+
+    created = add_clinical_event(
+        db=db,
+        animal_id=animal_id,
+        title=title,
+        veterinarian=veterinarian,
+        notes=notes,
+        date_str=datetime.now().strftime("%d/%m/%Y"),
+    )
+    if created is None:
+        raise HTTPException(status_code=404, detail="Animal nao encontrado.")
+
+    return RedirectResponse(
+        url=f"/animais/{animal_id}?ok=Registro+de+consulta+salvo",
+        status_code=303,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Stock & Supplies Routes
+# ---------------------------------------------------------------------------
 
 
 @router.get("/estoque", response_model=None)
@@ -439,7 +523,7 @@ def stock_page(
     request: Request,
     db: Annotated[Session, Depends(get_db)],
 ) -> HTMLResponse | RedirectResponse:
-    """Render the dedicated stock and supply tracking screen."""
+    """Render the NGO supplies and food inventory screen."""
     user, redirect = _auth_gate(request, db)
     if redirect is not None or user is None:
         return redirect or RedirectResponse(url="/login", status_code=303)
@@ -450,8 +534,55 @@ def stock_page(
         context={
             **_base_context(user, "estoque", "Estoque"),
             "stock_items": list_stock(db),
+            "msg_ok": request.query_params.get("ok"),
         },
     )
+
+
+@router.get("/estoque/busca", response_class=HTMLResponse)
+def search_stock(
+    request: Request,
+    db: Annotated[Session, Depends(get_db)],
+    categoria: str = "",
+    termo: str = "",
+) -> HTMLResponse:
+    """Filter inventory items by category and search query."""
+    user, _ = _auth_gate(request, db)
+    if user is None:
+        raise HTTPException(status_code=401, detail="Nao autenticado.")
+
+    filtered = list_stock(db, category=categoria, query=termo)
+    return templates.TemplateResponse(
+        request=request,
+        name="fragments/stock_table.html",
+        context={"stock_items": filtered},
+    )
+
+
+@router.post("/estoque/itens")
+def create_stock_item_route(
+    request: Request,
+    db: Annotated[Session, Depends(get_db)],
+    name: Annotated[str, Form()],
+    category: Annotated[str, Form()],
+    quantity: Annotated[int, Form()],
+    unit: Annotated[str, Form()],
+    min_quantity: Annotated[int, Form()] = 2,
+) -> RedirectResponse:
+    """Register a new item in NGO supplies stock."""
+    user, redirect = _auth_gate(request, db)
+    if redirect is not None or user is None:
+        return redirect or RedirectResponse(url="/login", status_code=303)
+
+    create_stock_item(
+        db=db,
+        name=name,
+        category=category,
+        quantity=quantity,
+        unit=unit,
+        min_quantity=min_quantity,
+    )
+    return RedirectResponse(url="/estoque?ok=Item+cadastrado", status_code=303)
 
 
 @router.post("/estoque/movimentacao")
@@ -473,7 +604,12 @@ def register_stock_movement_route(
         movement_type=movement_type,
         quantity=quantity,
     )
-    return RedirectResponse(url="/estoque", status_code=303)
+    return RedirectResponse(url="/estoque?ok=Saldo+atualizado", status_code=303)
+
+
+# ---------------------------------------------------------------------------
+# Temporary Foster Homes & Adoptions Routes
+# ---------------------------------------------------------------------------
 
 
 @router.get("/lares", response_model=None)
@@ -486,16 +622,121 @@ def foster_and_adoptions_page(
     if redirect is not None or user is None:
         return redirect or RedirectResponse(url="/login", status_code=303)
 
+    animals = list_animals(db)
+    homes = list_temporary_homes(db)
+    home_animals_map: dict[int, list[str]] = {}
+    for home in homes:
+        matched = [
+            a.name
+            for a in animals
+            if home.volunteer_name.lower() in a.location.lower()
+            and a.status != "Adotado"
+        ]
+        home_animals_map[home.id] = matched or home.active_animals
+
     return templates.TemplateResponse(
         request=request,
         name="lares.html",
         context={
             **_base_context(user, "lares", "Lares e Adocoes"),
-            "foster_homes": list_temporary_homes(db),
+            "foster_homes": homes,
+            "home_animals_map": home_animals_map,
             "adoptions": list_adoptions(db),
-            "animals": list_animals(db),
+            "msg_ok": request.query_params.get("ok"),
         },
     )
+
+
+@router.post("/lares")
+def create_foster_home_route(
+    request: Request,
+    db: Annotated[Session, Depends(get_db)],
+    volunteer_name: Annotated[str, Form()],
+    contact: Annotated[str, Form()],
+    neighborhood: Annotated[str, Form()],
+    capacity: Annotated[int, Form()] = 1,
+) -> RedirectResponse:
+    """Register a new volunteer temporary home."""
+    user, redirect = _auth_gate(request, db)
+    if redirect is not None or user is None:
+        return redirect or RedirectResponse(url="/login", status_code=303)
+
+    create_temporary_home(
+        db=db,
+        volunteer_name=volunteer_name,
+        contact=contact,
+        neighborhood=neighborhood,
+        capacity=capacity,
+    )
+    return RedirectResponse(url="/lares?ok=Lar+temporario+cadastrado", status_code=303)
+
+
+@router.post("/lares/{home_id}/editar")
+def update_foster_home_route(
+    home_id: int,
+    request: Request,
+    db: Annotated[Session, Depends(get_db)],
+    volunteer_name: Annotated[str, Form()],
+    contact: Annotated[str, Form()],
+    neighborhood: Annotated[str, Form()],
+    capacity: Annotated[int, Form()] = 1,
+) -> RedirectResponse:
+    """Update an existing volunteer temporary home."""
+    user, redirect = _auth_gate(request, db)
+    if redirect is not None or user is None:
+        return redirect or RedirectResponse(url="/login", status_code=303)
+
+    update_temporary_home(
+        db=db,
+        home_id=home_id,
+        volunteer_name=volunteer_name,
+        contact=contact,
+        neighborhood=neighborhood,
+        capacity=capacity,
+    )
+    return RedirectResponse(url="/lares?ok=Lar+atualizado", status_code=303)
+
+
+@router.post("/lares/{home_id}/excluir")
+def delete_foster_home_route(
+    home_id: int,
+    request: Request,
+    db: Annotated[Session, Depends(get_db)],
+) -> RedirectResponse:
+    """Remove a volunteer temporary home."""
+    user, redirect = _auth_gate(request, db)
+    if redirect is not None or user is None:
+        return redirect or RedirectResponse(url="/login", status_code=303)
+
+    delete_temporary_home(db, home_id)
+    return RedirectResponse(url="/lares?ok=Lar+removido", status_code=303)
+
+
+@router.post("/adocoes")
+def create_adoption_route(
+    request: Request,
+    db: Annotated[Session, Depends(get_db)],
+    animal_id: Annotated[int, Form()],
+    adopter_name: Annotated[str, Form()],
+    adopter_cpf: Annotated[str, Form()],
+    adopter_contact: Annotated[str, Form()],
+    adopter_address: Annotated[str, Form()],
+) -> RedirectResponse:
+    """Register an adoption and mark the animal as Adopted."""
+    user, redirect = _auth_gate(request, db)
+    if redirect is not None or user is None:
+        return redirect or RedirectResponse(url="/login", status_code=303)
+
+    create_adoption_record(
+        db=db,
+        animal_id=animal_id,
+        adopter_name=adopter_name,
+        adopter_cpf=adopter_cpf,
+        adopter_contact=adopter_contact,
+        adopter_address=adopter_address,
+        adoption_date=datetime.now().strftime("%d/%m/%Y"),
+    )
+    return RedirectResponse(url="/lares?ok=Adocao+registrada", status_code=303)
 
 
 # ---------------------------------------------------------------------------
@@ -691,7 +932,7 @@ def admin_users_page(
 
 
 # ---------------------------------------------------------------------------
-# HTMX Partials, Modals & Printable Adoption Term
+# Global Search, Modals & Printable Adoption Term
 # ---------------------------------------------------------------------------
 
 
@@ -701,7 +942,7 @@ def global_search(
     db: Annotated[Session, Depends(get_db)],
     q: str = "",
 ) -> HTMLResponse:
-    """Search across animals, microchips, and stock lots via HTMX."""
+    """Search across animals and stock items via HTMX."""
     user, _ = _auth_gate(request, db)
     if user is None:
         raise HTTPException(status_code=401, detail="Nao autenticado.")
@@ -723,143 +964,33 @@ def global_search(
     )
 
 
-@router.get("/animais/busca", response_class=HTMLResponse)
-def search_animals(
-    request: Request,
-    db: Annotated[Session, Depends(get_db)],
-    termo: str = "",
-    status_filtro: str = "",
-) -> HTMLResponse:
-    """Filter animals dynamically using HTMX partial requests."""
-    user, _ = _auth_gate(request, db)
-    if user is None:
-        raise HTTPException(status_code=401, detail="Nao autenticado.")
-
-    filtered = list_animals(db, query=termo, status_filter=status_filtro)
-    return templates.TemplateResponse(
-        request=request,
-        name="fragments/animal_table.html",
-        context={"animals": filtered},
-    )
-
-
-@router.get("/animais/{animal_id}/prontuario", response_class=HTMLResponse)
-def get_animal_record(
-    request: Request,
-    animal_id: int,
-    db: Annotated[Session, Depends(get_db)],
-) -> HTMLResponse:
-    """Render clinical record drawer/modal for a specific animal."""
-    user, _ = _auth_gate(request, db)
-    if user is None:
-        raise HTTPException(status_code=401, detail="Nao autenticado.")
-
-    animal = get_animal_by_id(db, animal_id)
-    if animal is None:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Animal com identificador {animal_id} nao encontrado.",
-        )
-
-    return templates.TemplateResponse(
-        request=request,
-        name="fragments/animal_detail.html",
-        context={"animal": animal, "active_tab": "clinico"},
-    )
-
-
-@router.get("/animais/{animal_id}/prontuario/aba/{tab}", response_class=HTMLResponse)
-def get_animal_record_tab(
-    request: Request,
-    animal_id: int,
-    tab: str,
-    db: Annotated[Session, Depends(get_db)],
-) -> HTMLResponse:
-    """Render a specific tab inside the animal clinical record via HTMX."""
-    user, _ = _auth_gate(request, db)
-    if user is None:
-        raise HTTPException(status_code=401, detail="Nao autenticado.")
-
-    animal = get_animal_by_id(db, animal_id)
-    if animal is None:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Animal com identificador {animal_id} nao encontrado.",
-        )
-    if tab not in {"clinico", "vacinas", "lares"}:
-        raise HTTPException(status_code=400, detail="Aba de prontuario invalida.")
-
-    return templates.TemplateResponse(
-        request=request,
-        name="fragments/animal_detail_tabs.html",
-        context={"animal": animal, "active_tab": tab},
-    )
-
-
-@router.post("/animais/{animal_id}/atendimentos", response_class=HTMLResponse)
-def add_clinical_event_route(
-    request: Request,
-    animal_id: int,
-    db: Annotated[Session, Depends(get_db)],
-    title: Annotated[str, Form()],
-    veterinarian: Annotated[str, Form()],
-    notes: Annotated[str, Form()],
-) -> HTMLResponse:
-    """Persist a new clinical event and return the refreshed clinical tab."""
-    user, _ = _auth_gate(request, db)
-    if user is None:
-        raise HTTPException(status_code=401, detail="Nao autenticado.")
-
-    created = add_clinical_event(
-        db=db,
-        animal_id=animal_id,
-        title=title,
-        veterinarian=veterinarian,
-        notes=notes,
-        date_str=datetime.now().strftime("%d/%m/%Y"),
-    )
-    if created is None:
-        raise HTTPException(status_code=404, detail="Animal nao encontrado.")
-
-    animal = get_animal_by_id(db, animal_id)
-    return templates.TemplateResponse(
-        request=request,
-        name="fragments/animal_detail_tabs.html",
-        context={"animal": animal, "active_tab": "clinico"},
-    )
-
-
-@router.get("/estoque/busca", response_class=HTMLResponse)
-def search_stock(
-    request: Request,
-    db: Annotated[Session, Depends(get_db)],
-    categoria: str = "",
-    termo: str = "",
-) -> HTMLResponse:
-    """Filter inventory items by category and search query."""
-    user, _ = _auth_gate(request, db)
-    if user is None:
-        raise HTTPException(status_code=401, detail="Nao autenticado.")
-
-    filtered = list_stock(db, category=categoria, query=termo)
-    return templates.TemplateResponse(
-        request=request,
-        name="fragments/stock_table.html",
-        context={"stock_items": filtered},
-    )
-
-
 @router.get("/modais/novo-resgate", response_class=HTMLResponse)
 def modal_new_rescue(
     request: Request,
     db: Annotated[Session, Depends(get_db)],
 ) -> HTMLResponse:
-    """Render the modal form for registering a new animal rescue."""
+    """Render modal form for registering a new animal."""
     user, _ = _auth_gate(request, db)
     if user is None:
         raise HTTPException(status_code=401, detail="Nao autenticado.")
     return templates.TemplateResponse(
-        request=request, name="fragments/modal_new_rescue.html", context={}
+        request=request,
+        name="fragments/modal_new_rescue.html",
+        context={"location_options": _location_options(db)},
+    )
+
+
+@router.get("/modais/novo-item-estoque", response_class=HTMLResponse)
+def modal_new_stock_item(
+    request: Request,
+    db: Annotated[Session, Depends(get_db)],
+) -> HTMLResponse:
+    """Render modal form for creating a new stock item."""
+    user, _ = _auth_gate(request, db)
+    if user is None:
+        raise HTTPException(status_code=401, detail="Nao autenticado.")
+    return templates.TemplateResponse(
+        request=request, name="fragments/modal_new_stock_item.html", context={}
     )
 
 
@@ -868,7 +999,7 @@ def modal_stock_movement(
     request: Request,
     db: Annotated[Session, Depends(get_db)],
 ) -> HTMLResponse:
-    """Render the modal form for logging a stock entry or exit."""
+    """Render modal form for logging a stock entry or exit."""
     user, _ = _auth_gate(request, db)
     if user is None:
         raise HTTPException(status_code=401, detail="Nao autenticado.")
@@ -879,12 +1010,65 @@ def modal_stock_movement(
     )
 
 
+@router.get("/modais/novo-lar", response_class=HTMLResponse)
+def modal_new_foster_home(
+    request: Request,
+    db: Annotated[Session, Depends(get_db)],
+) -> HTMLResponse:
+    """Render modal form for registering a new foster home."""
+    user, _ = _auth_gate(request, db)
+    if user is None:
+        raise HTTPException(status_code=401, detail="Nao autenticado.")
+    return templates.TemplateResponse(
+        request=request,
+        name="fragments/modal_foster_home.html",
+        context={"home": None},
+    )
+
+
+@router.get("/modais/editar-lar/{home_id}", response_class=HTMLResponse)
+def modal_edit_foster_home(
+    home_id: int,
+    request: Request,
+    db: Annotated[Session, Depends(get_db)],
+) -> HTMLResponse:
+    """Render modal form for editing an existing foster home."""
+    user, _ = _auth_gate(request, db)
+    if user is None:
+        raise HTTPException(status_code=401, detail="Nao autenticado.")
+    home = get_temporary_home_by_id(db, home_id)
+    if home is None:
+        raise HTTPException(status_code=404, detail="Lar temporario nao encontrado.")
+    return templates.TemplateResponse(
+        request=request,
+        name="fragments/modal_foster_home.html",
+        context={"home": home},
+    )
+
+
+@router.get("/modais/nova-adocao", response_class=HTMLResponse)
+def modal_new_adoption(
+    request: Request,
+    db: Annotated[Session, Depends(get_db)],
+) -> HTMLResponse:
+    """Render modal form for registering a completed adoption."""
+    user, _ = _auth_gate(request, db)
+    if user is None:
+        raise HTTPException(status_code=401, detail="Nao autenticado.")
+    animals = [a for a in list_animals(db) if a.status != "Adotado"]
+    return templates.TemplateResponse(
+        request=request,
+        name="fragments/modal_new_adoption.html",
+        context={"animals": animals},
+    )
+
+
 @router.get("/modais/novo-lancamento", response_class=HTMLResponse)
 def modal_new_financial(
     request: Request,
     db: Annotated[Session, Depends(get_db)],
 ) -> HTMLResponse:
-    """Render the modal form for registering a financial income or expense."""
+    """Render modal form for registering a financial income or expense."""
     user, _ = _auth_gate(request, db)
     if user is None:
         raise HTTPException(status_code=401, detail="Nao autenticado.")

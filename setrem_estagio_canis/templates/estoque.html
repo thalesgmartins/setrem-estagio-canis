@@ -6,34 +6,47 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold tracking-tight text-ink-primary">Controle de Estoque e Insumos</h1>
+            <h1 class="text-2xl font-bold tracking-tight text-ink-primary">Estoque de Suprimentos</h1>
             <p class="text-sm text-ink-secondary mt-0.5">
-                Rastreabilidade por lote, saldo minimo e alerta antecipado de validade.
+                Controle de racao, higiene, areia e acessorios da ONG.
             </p>
         </div>
-        <button
-            type="button"
-            hx-get="/modais/movimentacao-estoque"
-            hx-target="#modal-container"
-            hx-swap="innerHTML"
-            class="px-4 py-2.5 rounded-xl bg-patas-green hover:bg-patas-green-hover text-[#061c14] text-xs font-semibold transition-colors inline-flex items-center gap-1.5 self-start sm:self-auto">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
-            <span>Registrar Entrada/Saida</span>
-        </button>
+        <div class="flex items-center gap-2.5 flex-wrap">
+            <button
+                type="button"
+                hx-get="/modais/movimentacao-estoque"
+                hx-target="#modal-container"
+                hx-swap="innerHTML"
+                class="px-3.5 py-2.5 rounded-xl bg-elevated hover:bg-subtle border border-subtle text-xs font-medium text-ink-primary inline-flex items-center gap-1.5">
+                <i class="mdi mdi-swap-vertical text-base"></i>
+                <span>Entrada / Saida</span>
+            </button>
+            <button
+                type="button"
+                hx-get="/modais/novo-item-estoque"
+                hx-target="#modal-container"
+                hx-swap="innerHTML"
+                class="px-4 py-2.5 rounded-xl bg-patas-green hover:bg-patas-green-hover text-[#061c14] text-xs font-semibold inline-flex items-center gap-1.5">
+                <i class="mdi mdi-plus text-base"></i>
+                <span>Novo Item</span>
+            </button>
+        </div>
     </div>
+
+    {% if msg_ok %}
+    <div class="p-3.5 rounded-xl bg-patas-green/15 border border-patas-green/25 text-xs text-patas-green font-medium">
+        {{ msg_ok }}
+    </div>
+    {% endif %}
 
     <!-- Search & Category Filter Bar -->
     <div class="bg-surface border border-subtle rounded-xl p-4 flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between">
         <div class="relative flex-1 max-w-md">
-            <svg class="w-4 h-4 text-ink-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-            </svg>
+            <i class="mdi mdi-magnify text-base text-ink-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
             <input
                 type="search"
                 name="termo"
-                placeholder="Buscar por medicamento, racao ou numero de lote..."
+                placeholder="Buscar racao, higiene ou acessorio..."
                 hx-get="/estoque/busca"
                 hx-trigger="keyup changed delay:220ms, search"
                 hx-target="#stock-table-container"
@@ -44,7 +57,7 @@
         <input type="hidden" id="stock-category-input" name="categoria" value="">
 
         <div class="flex items-center gap-2 flex-wrap" id="stock-category-pills">
-            {% for label, value in [('Todos', ''), ('Medicamentos', 'Medicamentos'), ('Vacinas', 'Vacina'), ('Racao', 'Racao'), ('Higiene', 'Higiene')] %}
+            {% for label, value in [('Todos', ''), ('Racao', 'Racao'), ('Higiene', 'Higiene'), ('Acessorios', 'Acessorios')] %}
             <button
                 type="button"
                 onclick="selectStockCategory(this, '{{ value }}')"
@@ -58,7 +71,6 @@
         </div>
     </div>
 
-    <!-- HTMX Dynamic Stock Table -->
     <div id="stock-table-container">
         {% include "fragments/stock_table.html" %}
     </div>

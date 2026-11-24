@@ -8,28 +8,50 @@
         <div>
             <h1 class="text-2xl font-bold tracking-tight text-ink-primary">Lares Temporarios e Adocoes</h1>
             <p class="text-sm text-ink-secondary mt-0.5">
-                Rede de voluntarios acolhedores, ocupacao de vagas e historico de termos de adocao.
+                Cadastre voluntarios acolhedores, acompanhe vagas e registre adocoes concluidas.
             </p>
         </div>
+        <div class="flex items-center gap-2.5 flex-wrap">
+            <button
+                type="button"
+                hx-get="/modais/nova-adocao"
+                hx-target="#modal-container"
+                hx-swap="innerHTML"
+                class="px-3.5 py-2.5 rounded-xl bg-elevated hover:bg-subtle border border-subtle text-xs font-medium text-ink-primary inline-flex items-center gap-1.5">
+                <i class="mdi mdi-heart-plus-outline text-base"></i>
+                <span>Registrar Adocao</span>
+            </button>
+            <button
+                type="button"
+                hx-get="/modais/novo-lar"
+                hx-target="#modal-container"
+                hx-swap="innerHTML"
+                class="px-4 py-2.5 rounded-xl bg-patas-green hover:bg-patas-green-hover text-[#061c14] text-xs font-semibold inline-flex items-center gap-1.5">
+                <i class="mdi mdi-home-plus-outline text-base"></i>
+                <span>Novo Lar Temporario</span>
+            </button>
+        </div>
     </div>
+
+    {% if msg_ok %}
+    <div class="p-3.5 rounded-xl bg-patas-green/15 border border-patas-green/25 text-xs text-patas-green font-medium">
+        {{ msg_ok }}
+    </div>
+    {% endif %}
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
         <!-- Temporary Foster Homes -->
         <section class="bg-surface border border-subtle rounded-xl flex flex-col">
             <div class="px-5 py-4 border-b border-subtle flex items-center justify-between">
-                <div>
-                    <h2 class="text-sm font-semibold text-ink-primary">Lares Temporarios Cadastrados</h2>
-                    <p class="text-xs text-ink-secondary mt-0.5">Capacidade de acolhimento por voluntario</p>
-                </div>
-                <span class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-patas-blue/15 text-patas-blue border border-patas-blue/25 tabular">
-                    {{ foster_homes|length }} lares
-                </span>
+                <h2 class="text-sm font-semibold text-ink-primary">Lares Temporarios ({{ foster_homes|length }})</h2>
+                <span class="text-xs text-ink-muted">Voluntarios cadastrados</span>
             </div>
 
             <div class="p-5 space-y-3">
                 {% for home in foster_homes %}
-                {% set occupied = home.active_animals|length %}
+                {% set hosted = home_animals_map.get(home.id, []) %}
+                {% set occupied = hosted|length %}
                 {% set pct = (occupied * 100 // home.capacity) if home.capacity > 0 else 0 %}
                 <div class="p-4 rounded-xl bg-elevated/70 border border-subtle space-y-3">
                     <div class="flex items-start justify-between gap-3">
@@ -39,27 +61,43 @@
                                 Bairro {{ home.neighborhood }} · <span class="font-mono tabular">{{ home.contact }}</span>
                             </p>
                         </div>
-                        {% if home.active_animals %}
-                        <span class="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-patas-blue/15 text-patas-blue border border-patas-blue/25">
-                            Em acolhimento ({{ home.active_animals|join(', ') }})
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <button
+                                type="button"
+                                hx-get="/modais/editar-lar/{{ home.id }}"
+                                hx-target="#modal-container"
+                                hx-swap="innerHTML"
+                                title="Editar lar"
+                                class="p-1.5 rounded-lg bg-surface hover:bg-subtle border border-subtle text-ink-secondary hover:text-ink-primary">
+                                <i class="mdi mdi-pencil-outline text-sm"></i>
+                            </button>
+                            <form action="/lares/{{ home.id }}/excluir" method="post" onsubmit="return confirm('Remover este lar temporario?');" class="inline">
+                                <button type="submit" title="Excluir lar" class="p-1.5 rounded-lg bg-surface hover:bg-red-500/15 border border-subtle text-ink-secondary hover:text-red-400">
+                                    <i class="mdi mdi-trash-can-outline text-sm"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between text-xs">
+                        {% if hosted %}
+                        <span class="px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-patas-blue/15 text-patas-blue border border-patas-blue/25">
+                            Acolhendo: {{ hosted|join(', ') }}
                         </span>
                         {% else %}
-                        <span class="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-patas-green/15 text-patas-green border border-patas-green/25">
+                        <span class="px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-patas-green/15 text-patas-green border border-patas-green/25">
                             Vaga livre
                         </span>
                         {% endif %}
+                        <span class="text-[11px] text-ink-muted tabular">{{ occupied }} / {{ home.capacity }} vaga(s)</span>
                     </div>
 
-                    <div class="space-y-1.5">
-                        <div class="flex items-center justify-between text-[11px] text-ink-muted tabular">
-                            <span>Ocupacao</span>
-                            <span>{{ occupied }} / {{ home.capacity }} vaga(s)</span>
-                        </div>
-                        <div class="h-1.5 w-full rounded-full bg-surface overflow-hidden">
-                            <div class="h-full rounded-full bg-patas-blue" style="width: {{ pct }}%"></div>
-                        </div>
+                    <div class="h-1.5 w-full rounded-full bg-surface overflow-hidden">
+                        <div class="h-full rounded-full bg-patas-blue" style="width: {{ pct if pct <= 100 else 100 }}%"></div>
                     </div>
                 </div>
+                {% else %}
+                <p class="text-xs text-ink-muted text-center py-6">Nenhum lar temporario cadastrado ainda.</p>
                 {% endfor %}
             </div>
         </section>
@@ -67,18 +105,13 @@
         <!-- Completed Adoptions -->
         <section class="bg-surface border border-subtle rounded-xl flex flex-col">
             <div class="px-5 py-4 border-b border-subtle flex items-center justify-between">
-                <div>
-                    <h2 class="text-sm font-semibold text-ink-primary">Adocoes Concluidas</h2>
-                    <p class="text-xs text-ink-secondary mt-0.5">Registros com termo assinado e acompanhamento</p>
-                </div>
-                <span class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-patas-green/15 text-patas-green border border-patas-green/25 tabular">
-                    {{ adoptions|length }} concluida(s)
-                </span>
+                <h2 class="text-sm font-semibold text-ink-primary">Adocoes Concluidas ({{ adoptions|length }})</h2>
+                <span class="text-xs text-ink-muted">Historico</span>
             </div>
 
             <div class="p-5 space-y-3">
                 {% for adocao in adoptions %}
-                <div class="p-4 rounded-xl bg-elevated/70 border border-subtle space-y-3">
+                <div class="p-4 rounded-xl bg-elevated/70 border border-subtle space-y-2.5">
                     <div class="flex items-start justify-between gap-3">
                         <div>
                             <p class="text-sm font-semibold text-ink-primary">
@@ -89,18 +122,17 @@
                                 Adotante: {{ adocao.adopter_name }}
                             </p>
                         </div>
-                        <span class="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-patas-green/15 text-patas-green border border-patas-green/25 font-mono tabular">
+                        <span class="px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-patas-green/15 text-patas-green border border-patas-green/25 font-mono tabular">
                             {{ adocao.adoption_date }}
                         </span>
                     </div>
 
-                    <div class="pt-2.5 border-t border-subtle/80 flex flex-wrap items-center justify-between gap-2 text-xs text-ink-muted">
-                        <span class="font-mono tabular">CPF: {{ adocao.adopter_cpf }} · {{ adocao.adopter_contact }}</span>
-                        <a href="/termo-adocao/5" target="_blank" class="font-medium text-patas-blue hover:underline">
-                            Reimprimir termo
-                        </a>
+                    <div class="pt-2 border-t border-subtle/80 text-xs text-ink-muted font-mono tabular">
+                        CPF: {{ adocao.adopter_cpf }} · {{ adocao.adopter_contact }}
                     </div>
                 </div>
+                {% else %}
+                <p class="text-xs text-ink-muted text-center py-6">Nenhuma adocao registrada ainda.</p>
                 {% endfor %}
             </div>
         </section>

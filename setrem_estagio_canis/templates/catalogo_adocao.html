@@ -5,60 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Adocao — Patas e Pelos</title>
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
-                        mono: ['"JetBrains Mono"', 'monospace'],
-                    },
-                    colors: {
-                        canvas: '#121212',
-                        surface: '#1e1e1e',
-                        elevated: '#252525',
-                        subtle: '#2e2e2e',
-                        ink: {
-                            primary: '#f5f5f5',
-                            secondary: '#a0a0a0',
-                            muted: '#737373',
-                        },
-                        patas: {
-                            green: '#05AC78',
-                            'green-hover': '#049366',
-                            orange: '#ff9d01',
-                            blue: '#5e7dfc',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    <link rel="stylesheet" href="/static/css/tailwind.min.css">
+    <link rel="stylesheet" href="/static/css/materialdesignicons.min.css">
+    <script src="/static/js/htmx.min.js"></script>
 </head>
 <body class="bg-canvas text-ink-primary min-h-screen font-sans antialiased flex flex-col">
 
-    <!-- Public Top Bar -->
+    <!-- Clean Public Top Bar (No Volunteer Link) -->
     <header class="bg-surface/90 backdrop-blur-md border-b border-subtle sticky top-0 z-30">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
             <a href="/adocao" class="flex items-center gap-3">
-                <img src="/static/laika-logo.svg" alt="Laika" class="w-8 h-8 object-contain">
+                <img src="/static/laika-logo.svg" alt="Patas e Pelos" class="w-8 h-8 object-contain">
                 <div class="leading-tight">
                     <span class="block text-sm font-bold text-ink-primary">Patas e Pelos</span>
                     <span class="block text-[11px] text-ink-secondary">Adocao Responsavel</span>
                 </div>
-            </a>
-
-            <a href="/login"
-               class="px-3.5 py-2 rounded-xl bg-elevated hover:bg-subtle border border-subtle text-xs font-medium text-ink-primary transition-colors">
-                Area do Voluntario
             </a>
         </div>
     </header>
@@ -68,14 +29,15 @@
 
         <!-- Hero Intro -->
         <section class="space-y-3 max-w-2xl">
-            <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-semibold bg-patas-green/15 text-patas-green border border-patas-green/25">
-                Catalogo Publico de Adocao
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-patas-green/15 text-patas-green border border-patas-green/25">
+                <i class="mdi mdi-paw text-sm"></i>
+                <span>Catalogo Publico de Adocao</span>
             </span>
             <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-ink-primary">
                 Encontre seu proximo companheiro
             </h1>
             <p class="text-sm text-ink-secondary leading-relaxed">
-                Todos os animais abaixo estao prontos para ganhar um lar responsavel em {{ ong_city }}. Clique em "Quero Adotar" para conversar diretamente com a equipe da ONG.
+                Todos os animais abaixo estao prontos para ganhar um lar responsavel. Clique em "Quero Adotar" para falar com a equipe pelo WhatsApp.
             </p>
         </section>
 
@@ -115,10 +77,6 @@
         </section>
 
     </main>
-
-    <footer class="border-t border-subtle py-5 text-center text-xs text-ink-muted">
-        Associacao de Protecao Animal ONG Patas e Pelos — {{ ong_city }}
-    </footer>
 
 </body>
 </html>

@@ -278,28 +278,85 @@ def create_animal(
     size: str,
     location: str,
     rescue_notes: str,
+    breed: str = "Sem Raca Definida (SRD)",
+    age_approx: str = "A avaliar",
+    gender: str = "A avaliar",
+    status: str = "Acolhido",
+    neutered: bool = False,
+    temperament: str = "",
 ) -> Animal:
     """Persist a newly rescued animal."""
     animal = Animal(
         name=name.strip(),
         species=species.strip(),
-        breed="Sem Raca Definida (SRD)",
+        breed=breed.strip() or "Sem Raca Definida (SRD)",
         size=size.strip(),
-        age_approx="A avaliar",
-        gender="A avaliar",
-        status="Acolhido",
+        age_approx=age_approx.strip() or "A avaliar",
+        gender=gender.strip() or "A avaliar",
+        status=status.strip() or "Acolhido",
         intake_date="Hoje",
-        neutered=False,
+        neutered=neutered,
         location=location.strip(),
         microchip="",
         rescue_notes=rescue_notes.strip(),
-        temperament="Em avaliacao comportamental.",
+        temperament=temperament.strip() or "Em avaliacao comportamental.",
         foster_history_text=f"Entrada: {location.strip()}",
     )
     db.add(animal)
     db.commit()
     db.refresh(animal)
     return animal
+
+
+def update_animal(
+    db: Session,
+    animal_id: int,
+    updates: dict[str, object],
+) -> Animal | None:
+    """Update editable fields of an existing animal and log location changes."""
+    animal = get_animal_by_id(db, animal_id)
+    if animal is None:
+        return None
+
+    old_location = animal.location
+    for field_name in (
+        "name",
+        "species",
+        "breed",
+        "size",
+        "age_approx",
+        "gender",
+        "status",
+        "location",
+        "temperament",
+        "rescue_notes",
+    ):
+        if field_name in updates:
+            setattr(animal, field_name, str(updates[field_name]).strip())
+
+    if "neutered" in updates:
+        animal.neutered = bool(updates["neutered"])
+
+    if animal.location != old_location and animal.location:
+        history_line = f"Transferido para: {animal.location}"
+        if animal.foster_history_text:
+            animal.foster_history_text = f"{history_line}\n{animal.foster_history_text}"
+        else:
+            animal.foster_history_text = history_line
+
+    db.commit()
+    db.refresh(animal)
+    return animal
+
+
+def delete_animal(db: Session, animal_id: int) -> bool:
+    """Delete an animal record by ID."""
+    animal = db.get(Animal, animal_id)
+    if animal is None:
+        return False
+    db.delete(animal)
+    db.commit()
+    return True
 
 
 def add_clinical_event(
@@ -365,6 +422,34 @@ def list_stock(
     return filtered
 
 
+def create_stock_item(
+    db: Session,
+    name: str,
+    category: str,
+    quantity: int,
+    unit: str,
+    min_quantity: int,
+) -> StockItem:
+    """Create a new supply item in NGO inventory."""
+    qty = max(0, quantity)
+    min_qty = max(0, min_quantity)
+    status = "Estoque Critico" if qty <= min_qty else "Normal"
+    item = StockItem(
+        name=name.strip(),
+        category=category.strip(),
+        quantity=qty,
+        unit=unit.strip() or "un",
+        lot_number="—",
+        expiration_date="—",
+        min_quantity=min_qty,
+        status=status,
+    )
+    db.add(item)
+    db.commit()
+    db.refresh(item)
+    return item
+
+
 def register_stock_movement(
     db: Session,
     item_id: int,
@@ -404,9 +489,97 @@ def list_temporary_homes(db: Session) -> list[TemporaryHome]:
     )
 
 
+def get_temporary_home_by_id(db: Session, home_id: int) -> TemporaryHome | None:
+    """Retrieve a single volunteer foster home by ID."""
+    return db.get(TemporaryHome, home_id)
+
+
+def create_temporary_home(
+    db: Session,
+    volunteer_name: str,
+    contact: str,
+    neighborhood: str,
+    capacity: int,
+) -> TemporaryHome:
+    """Register a new volunteer foster home."""
+    home = TemporaryHome(
+        volunteer_name=volunteer_name.strip(),
+        contact=contact.strip(),
+        neighborhood=neighborhood.strip(),
+        capacity=max(1, capacity),
+        active_animals_csv="",
+    )
+    db.add(home)
+    db.commit()
+    db.refresh(home)
+    return home
+
+
+def update_temporary_home(
+    db: Session,
+    home_id: int,
+    volunteer_name: str,
+    contact: str,
+    neighborhood: str,
+    capacity: int,
+) -> TemporaryHome | None:
+    """Update an existing volunteer foster home."""
+    home = db.get(TemporaryHome, home_id)
+    if home is None:
+        return None
+    home.volunteer_name = volunteer_name.strip()
+    home.contact = contact.strip()
+    home.neighborhood = neighborhood.strip()
+    home.capacity = max(1, capacity)
+    db.commit()
+    db.refresh(home)
+    return home
+
+
+def delete_temporary_home(db: Session, home_id: int) -> bool:
+    """Delete a volunteer foster home by ID."""
+    home = db.get(TemporaryHome, home_id)
+    if home is None:
+        return False
+    db.delete(home)
+    db.commit()
+    return True
+
+
 def list_adoptions(db: Session) -> list[AdoptionTerm]:
     """List recorded adoptions."""
     return list(db.scalars(select(AdoptionTerm).order_by(AdoptionTerm.id.desc())).all())
+
+
+def create_adoption_record(
+    db: Session,
+    animal_id: int,
+    adopter_name: str,
+    adopter_cpf: str,
+    adopter_contact: str,
+    adopter_address: str,
+    adoption_date: str,
+) -> AdoptionTerm | None:
+    """Register an adoption and mark the animal as Adopted."""
+    animal = db.get(Animal, animal_id)
+    if animal is None:
+        return None
+    term = AdoptionTerm(
+        adopter_name=adopter_name.strip(),
+        adopter_cpf=adopter_cpf.strip(),
+        adopter_contact=adopter_contact.strip(),
+        adopter_address=adopter_address.strip(),
+        animal_name=animal.name,
+        animal_species=animal.species,
+        adoption_date=adoption_date,
+        status="Concluida",
+    )
+    animal.status = "Adotado"
+    animal.location = f"Adotado - {adopter_name.strip()}"
+    db.add(term)
+    db.commit()
+    db.refresh(term)
+    return term
 
 
 # ---------------------------------------------------------------------------
@@ -796,67 +969,67 @@ def _seed_animals(db: Session) -> None:
 
 
 def _seed_stock(db: Session) -> None:
-    """Insert initial supply and pharmacy stock items."""
+    """Insert initial NGO supplies (food, litter, hygiene, and accessories)."""
     db.add_all(
         [
             StockItem(
-                name="Vacina Canina Nobivac Puppy DP",
-                category="Vacina",
-                quantity=8,
-                unit="doses",
-                lot_number="NV-2026-09",
-                expiration_date="15/10/2026",
-                min_quantity=10,
-                status="Vencendo em breve",
-            ),
-            StockItem(
-                name="Amoxicilina + Clavulanato 250mg",
-                category="Antibiotico",
-                quantity=3,
-                unit="frascos",
-                lot_number="AMX-7412",
-                expiration_date="10/12/2026",
-                min_quantity=5,
-                status="Estoque Critico",
-            ),
-            StockItem(
-                name="Simparic 20 a 40kg",
-                category="Antiparasitario",
-                quantity=14,
-                unit="comprimidos",
-                lot_number="SIM-9910",
-                expiration_date="30/08/2027",
+                name="Racao Seca Caes Adultos (Saco 15kg)",
+                category="Racao",
+                quantity=12,
+                unit="sacos",
+                lot_number="RC-AD-15",
+                expiration_date="05/03/2027",
                 min_quantity=6,
                 status="Normal",
             ),
             StockItem(
-                name="Racao Seca Adulto Premium Especial",
+                name="Racao Seca Caes Filhotes (Saco 10kg)",
                 category="Racao",
-                quantity=180,
-                unit="kg",
-                lot_number="RC-20260901",
-                expiration_date="05/03/2027",
-                min_quantity=80,
-                status="Normal",
-            ),
-            StockItem(
-                name="Meloxicam 2mg Comprimidos",
-                category="Anti-inflamatorio",
                 quantity=2,
-                unit="caixas",
-                lot_number="MLX-4501",
-                expiration_date="20/11/2026",
+                unit="sacos",
+                lot_number="RC-FL-10",
+                expiration_date="10/12/2026",
                 min_quantity=4,
                 status="Estoque Critico",
             ),
             StockItem(
-                name="Clorexidina Degermante 2% (1L)",
-                category="Higiene",
-                quantity=6,
-                unit="frascos",
-                lot_number="CLX-2026-04",
-                expiration_date="18/06/2027",
+                name="Racao Gatos Castrados (Saco 10kg)",
+                category="Racao",
+                quantity=5,
+                unit="sacos",
+                lot_number="RC-GT-10",
+                expiration_date="20/04/2027",
                 min_quantity=3,
+                status="Normal",
+            ),
+            StockItem(
+                name="Areia Sanitaria para Gatos (4kg)",
+                category="Higiene",
+                quantity=3,
+                unit="pacotes",
+                lot_number="AR-04",
+                expiration_date="—",
+                min_quantity=5,
+                status="Estoque Critico",
+            ),
+            StockItem(
+                name="Tapete Higienico Descartavel (30 un)",
+                category="Higiene",
+                quantity=8,
+                unit="pacotes",
+                lot_number="TP-30",
+                expiration_date="—",
+                min_quantity=4,
+                status="Normal",
+            ),
+            StockItem(
+                name="Coleiras e Guias Sortidas",
+                category="Acessorios",
+                quantity=14,
+                unit="unidades",
+                lot_number="AC-01",
+                expiration_date="—",
+                min_quantity=5,
                 status="Normal",
             ),
         ]
