@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold tracking-tight text-ink-primary">Controle de Estoque e Insumos</h1>
+            <p class="text-sm text-ink-secondary mt-0.5">
+                Rastreabilidade por lote, saldo minimo e alerta antecipado de validade.
+            </p>
+        </div>
+        <button
+            type="button"
+            hx-get="/modais/movimentacao-estoque"
+            hx-target="#modal-container"
+            hx-swap="innerHTML"
+            class="px-4 py-2.5 rounded-xl bg-patas-green hover:bg-patas-green-hover text-[#061c14] text-xs font-semibold transition-colors inline-flex items-center gap-1.5 self-start sm:self-auto">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            <span>Registrar Entrada/Saida</span>
+        </button>
+    </div>
+
+    <!-- Search & Category Filter Bar -->
+    <div class="bg-surface border border-subtle rounded-xl p-4 flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between">
+        <div class="relative flex-1 max-w-md">
+            <svg class="w-4 h-4 text-ink-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+            </svg>
+            <input
+                type="search"
+                name="termo"
+                placeholder="Buscar por medicamento, racao ou numero de lote..."
+                hx-get="/estoque/busca"
+                hx-trigger="keyup changed delay:220ms, search"
+                hx-target="#stock-table-container"
+                hx-include="#stock-category-input"
+                class="w-full pl-10 pr-4 py-2 text-xs bg-elevated border border-subtle rounded-xl text-ink-primary placeholder-ink-muted focus:outline-none focus:border-patas-blue focus:ring-1 focus:ring-patas-blue">
+        </div>
+
+        <input type="hidden" id="stock-category-input" name="categoria" value="">
+
+        <div class="flex items-center gap-2 flex-wrap" id="stock-category-pills">
+            {% for label, value in [('Todos', ''), ('Medicamentos', 'Medicamentos'), ('Vacinas', 'Vacina'), ('Racao', 'Racao'), ('Higiene', 'Higiene')] %}
+            <button
+                type="button"
+                onclick="selectStockCategory(this, '{{ value }}')"
+                hx-get="/estoque/busca?categoria={{ value }}"
+                hx-target="#stock-table-container"
+                hx-include="[name='termo']"
+                class="stock-pill px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors {% if value == '' %}bg-patas-green/15 text-patas-green border-patas-green/30{% else %}bg-elevated text-ink-secondary border-subtle hover:text-ink-primary{% endif %}">
+                {{ label }}
+            </button>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- HTMX Dynamic Stock Table -->
+    <div id="stock-table-container">
+        {% include "fragments/stock_table.html" %}
+    </div>
+
+</div>
+
+<script>
+    function selectStockCategory(button, value) {
+        const hiddenInput = document.getElementById('stock-category-input');
+        if (hiddenInput) hiddenInput.value = value;
+        document.querySelectorAll('.stock-pill').forEach(function (btn) {
+            btn.className = 'stock-pill px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors bg-elevated text-ink-secondary border-subtle hover:text-ink-primary';
+        });
+        button.className = 'stock-pill px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors bg-patas-green/15 text-patas-green border-patas-green/30';
+    }
+</script>
+{% endblock %}

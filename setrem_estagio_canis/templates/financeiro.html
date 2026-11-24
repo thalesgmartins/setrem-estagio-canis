@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold tracking-tight text-ink-primary">Financeiro e Prestacao de Contas</h1>
+            <p class="text-sm text-ink-secondary mt-0.5">
+                Controle de doacoes, campanhas, despesas com clinicas parceiras e insumos da ONG.
+            </p>
+        </div>
+        <div class="flex items-center gap-2.5">
+            <a
+                href="/financeiro/exportar-csv"
+                class="px-3.5 py-2.5 rounded-xl bg-elevated hover:bg-subtle border border-subtle text-xs font-medium text-ink-primary transition-colors">
+                Exportar CSV
+            </a>
+            <button
+                type="button"
+                hx-get="/modais/novo-lancamento"
+                hx-target="#modal-container"
+                hx-swap="innerHTML"
+                class="px-4 py-2.5 rounded-xl bg-patas-green hover:bg-patas-green-hover text-[#061c14] text-xs font-semibold transition-colors inline-flex items-center gap-1.5">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+                <span>Novo Lancamento</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Financial KPIs -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div class="bg-surface border border-subtle rounded-xl p-5 space-y-2">
+            <span class="text-xs font-medium text-ink-secondary">Saldo em Caixa</span>
+            <p class="text-2xl font-bold font-mono tabular text-ink-primary">{{ summary.balance_brl }}</p>
+            <p class="text-xs text-ink-muted">Entradas menos despesas pagas</p>
+        </div>
+
+        <div class="bg-surface border border-subtle rounded-xl p-5 space-y-2">
+            <span class="text-xs font-medium text-ink-secondary">Total de Entradas</span>
+            <p class="text-2xl font-bold font-mono tabular text-patas-green">{{ summary.total_income_brl }}</p>
+            <p class="text-xs text-ink-muted">Doacoes PIX, rifas e padrinhos</p>
+        </div>
+
+        <div class="bg-surface border border-subtle rounded-xl p-5 space-y-2">
+            <span class="text-xs font-medium text-ink-secondary">Saidas Pagas</span>
+            <p class="text-2xl font-bold font-mono tabular text-ink-primary">{{ summary.total_expense_brl }}</p>
+            <p class="text-xs text-ink-muted">Racao, medicamentos e clinicas</p>
+        </div>
+
+        <div class="bg-surface border border-subtle rounded-xl p-5 space-y-2">
+            <span class="text-xs font-medium text-ink-secondary">Contas Pendentes</span>
+            <p class="text-2xl font-bold font-mono tabular text-patas-orange">{{ summary.pending_expense_brl }}</p>
+            <p class="text-xs text-patas-orange">Faturas em aberto em clinicas</p>
+        </div>
+    </section>
+
+    <!-- HTMX Filter Bar -->
+    <div class="bg-surface border border-subtle rounded-xl p-4 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+        <select
+            name="tipo"
+            hx-get="/financeiro/busca"
+            hx-trigger="change"
+            hx-target="#financial-table-container"
+            hx-include="[name='categoria']"
+            class="px-3.5 py-2 text-xs bg-elevated border border-subtle rounded-xl text-ink-primary focus:outline-none focus:border-patas-blue focus:ring-1 focus:ring-patas-blue">
+            <option value="">Todos os tipos</option>
+            <option value="Entrada">Apenas Entradas</option>
+            <option value="Saida">Apenas Saidas</option>
+        </select>
+
+        <select
+            name="categoria"
+            hx-get="/financeiro/busca"
+            hx-trigger="change"
+            hx-target="#financial-table-container"
+            hx-include="[name='tipo']"
+            class="px-3.5 py-2 text-xs bg-elevated border border-subtle rounded-xl text-ink-primary focus:outline-none focus:border-patas-blue focus:ring-1 focus:ring-patas-blue">
+            <option value="">Todas as categorias</option>
+            <option value="Doacao PIX">Doacao PIX</option>
+            <option value="Rifa / Brecho">Rifa / Brecho</option>
+            <option value="Clinica Veterinaria">Clinica Veterinaria</option>
+            <option value="Medicamentos">Medicamentos</option>
+            <option value="Racao">Racao</option>
+            <option value="Castracao">Castracao</option>
+        </select>
+    </div>
+
+    <!-- Transactions Table -->
+    <div id="financial-table-container">
+        {% include "fragments/financial_table.html" %}
+    </div>
+
+</div>
+{% endblock %}

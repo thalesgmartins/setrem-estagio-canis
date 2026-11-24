@@ -1,0 +1,85 @@
+<div
+    class="fixed inset-0 z-50 bg-black/75 backdrop-blur-[2px] flex items-center justify-center p-4 overflow-y-auto"
+    onclick="if (event.target === this) closeModal();">
+    <div class="bg-surface border border-subtle rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl">
+        <div class="px-6 py-4 border-b border-subtle flex items-center justify-between">
+            <div>
+                <h3 class="text-base font-bold text-ink-primary">Novo Lancamento Financeiro</h3>
+                <p class="text-xs text-ink-secondary mt-0.5">Registre doacoes, campanhas ou despesas veterinarias</p>
+            </div>
+            <button type="button" onclick="closeModal()" aria-label="Fechar" class="p-1.5 rounded-lg text-ink-secondary hover:text-ink-primary hover:bg-elevated">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <form action="/financeiro/lancamentos" method="post" class="p-6 space-y-4 text-xs">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="space-y-1.5">
+                    <label class="block font-medium text-ink-secondary">Tipo</label>
+                    <select name="tx_type" class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl text-ink-primary focus:outline-none focus:border-patas-blue">
+                        <option value="Entrada">Entrada (Doacao / Receita)</option>
+                        <option value="Saida">Saida (Despesa / Clinica)</option>
+                    </select>
+                </div>
+                <div class="space-y-1.5">
+                    <label class="block font-medium text-ink-secondary">Valor (R$)</label>
+                    <input type="text" name="amount" required placeholder="Ex: 250,00" class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl font-mono text-ink-primary placeholder-ink-muted focus:outline-none focus:border-patas-blue">
+                </div>
+                <div class="space-y-1.5">
+                    <label class="block font-medium text-ink-secondary">Categoria</label>
+                    <select name="category" class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl text-ink-primary focus:outline-none focus:border-patas-blue">
+                        <option value="Doacao PIX">Doacao PIX</option>
+                        <option value="Rifa / Brecho">Rifa / Brecho</option>
+                        <option value="Apadrinhamento">Apadrinhamento</option>
+                        <option value="Clinica Veterinaria">Clinica Veterinaria</option>
+                        <option value="Medicamentos">Medicamentos</option>
+                        <option value="Racao">Racao</option>
+                        <option value="Castracao">Castracao</option>
+                        <option value="Estrutura">Estrutura</option>
+                    </select>
+                </div>
+                <div class="space-y-1.5">
+                    <label class="block font-medium text-ink-secondary">Forma de pagamento</label>
+                    <select name="payment_method" class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl text-ink-primary focus:outline-none focus:border-patas-blue">
+                        <option value="PIX">PIX</option>
+                        <option value="Dinheiro">Dinheiro</option>
+                        <option value="Transferencia">Transferencia</option>
+                        <option value="Boleto">Boleto</option>
+                    </select>
+                </div>
+                <div class="space-y-1.5">
+                    <label class="block font-medium text-ink-secondary">Status</label>
+                    <select name="status" class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl text-ink-primary focus:outline-none focus:border-patas-blue">
+                        <option value="Pago">Pago / Recebido</option>
+                        <option value="Pendente">Pendente (Em aberto)</option>
+                    </select>
+                </div>
+                <div class="space-y-1.5">
+                    <label class="block font-medium text-ink-secondary">Animal vinculado (opcional)</label>
+                    <select name="related_animal" class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl text-ink-primary focus:outline-none focus:border-patas-blue">
+                        <option value="">Geral da ONG</option>
+                        {% for animal in animals %}
+                        <option value="{{ animal.name }}">{{ animal.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="space-y-1.5">
+                <label class="block font-medium text-ink-secondary">Descricao</label>
+                <input type="text" name="description" required placeholder="Ex: Consulta ortopedica ou doacao campanha setembro" class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl text-ink-primary placeholder-ink-muted focus:outline-none focus:border-patas-blue">
+            </div>
+
+            <div class="pt-3 border-t border-subtle flex justify-end gap-2.5">
+                <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl bg-elevated hover:bg-subtle border border-subtle font-medium text-ink-primary">
+                    Cancelar
+                </button>
+                <button type="submit" class="px-4 py-2 rounded-xl bg-patas-green hover:bg-patas-green-hover text-[#061c14] font-semibold">
+                    Salvar Lancamento
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

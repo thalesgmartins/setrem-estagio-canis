@@ -2,90 +2,127 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Termo de Adoção Responsável - {{ animal.name }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Termo de Adocao Responsavel — {{ animal.name }} | Laika</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        body {
+            font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+            background-color: #121212;
+        }
         @media print {
-            .no-print { display: none; }
-            body { background: white; padding: 0; }
+            .no-print { display: none !important; }
+            body { background: white !important; padding: 0 !important; }
+            .paper-sheet { box-shadow: none !important; border: none !important; margin: 0 !important; max-width: 100% !important; }
         }
     </style>
 </head>
-<body class="bg-slate-100 p-6 min-h-screen text-slate-800 font-sans">
-    <div class="max-w-3xl mx-auto bg-white p-8 rounded-xl shadow-md border border-slate-200">
-        <!-- Print / Actions Bar -->
-        <div class="no-print flex justify-between items-center mb-6 pb-4 border-b">
-            <span class="text-xs text-slate-500 font-medium">Documento gerado automaticamente pelo Sistema Canis</span>
-            <div class="space-x-2">
-                <button onclick="window.print()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-semibold">
-                    Imprimir Termo
-                </button>
-                <button onclick="window.close()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded text-xs font-semibold">
-                    Fechar
-                </button>
+<body class="min-h-screen p-4 sm:p-8 text-neutral-900">
+
+    <!-- Dark Mode Action Toolbar (hidden when printing) -->
+    <div class="no-print max-w-3xl mx-auto mb-5 px-5 py-3.5 rounded-xl bg-[#1e1e1e] border border-[#2e2e2e] flex flex-wrap justify-between items-center gap-3">
+        <div class="flex items-center gap-3">
+            <img src="/static/logo.jpg" alt="Logo Patas e Pelos" class="w-8 h-8 rounded-lg bg-white p-0.5 object-contain">
+            <div>
+                <p class="text-xs font-semibold text-[#f5f5f5]">Termo de Adocao · {{ animal.name }}</p>
+                <p class="text-[11px] text-[#a0a0a0]">Laika · Patas e Pelos</p>
             </div>
         </div>
-
-        <!-- Document Header -->
-        <div class="text-center mb-6 border-b pb-4">
-            <h1 class="text-xl font-bold tracking-tight text-slate-900 uppercase">
-                Termo de Responsabilidade e Adoção de Animal
-            </h1>
-            <p class="text-xs text-slate-500 mt-1">
-                Associação de Proteção Animal ONG Patas e Pelos - Horizontina / RS
-            </p>
+        <div class="flex items-center gap-2">
+            <button
+                type="button"
+                onclick="window.close()"
+                class="px-3.5 py-2 rounded-lg bg-[#252525] hover:bg-[#2e2e2e] border border-[#2e2e2e] text-xs font-medium text-[#f5f5f5] transition-colors">
+                Fechar
+            </button>
+            <button
+                type="button"
+                onclick="window.print()"
+                class="px-4 py-2 rounded-lg bg-[#05AC78] hover:bg-[#049366] text-[#061c14] text-xs font-semibold transition-colors">
+                Imprimir Termo
+            </button>
         </div>
+    </div>
+
+    <!-- Printable Paper Sheet -->
+    <article class="paper-sheet max-w-3xl mx-auto bg-white p-8 sm:p-10 rounded-xl shadow-2xl border border-neutral-200">
+        <!-- Document Header -->
+        <header class="flex items-center justify-between gap-4 pb-5 mb-6 border-b border-neutral-200">
+            <div class="flex items-center gap-3.5">
+                <img src="/static/logo.jpg" alt="Logo Patas e Pelos" class="w-12 h-12 object-contain">
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight text-neutral-900 uppercase">
+                        Termo de Responsabilidade e Adocao de Animal
+                    </h1>
+                    <p class="text-xs text-neutral-500 mt-0.5">
+                        Associacao de Protecao Animal ONG Patas e Pelos — Horizontina / RS
+                    </p>
+                </div>
+            </div>
+            <span class="text-[11px] font-mono text-neutral-500">ID #{{ animal.id }}</span>
+        </header>
 
         <!-- Content -->
-        <div class="space-y-4 text-xs leading-relaxed text-slate-700">
+        <div class="space-y-5 text-xs leading-relaxed text-neutral-700">
             <p>
-                Pelo presente instrumento, a <strong>Associação de Proteção Animal Patas e Pelos</strong> efetua a doação do animal abaixo qualificado para o(a) Adotante responsável, que assume integralmente a guarda e o compromisso de bem-estar do animal:
+                Pelo presente instrumento, a <strong>Associacao de Protecao Animal Patas e Pelos</strong> efetua a doacao do animal abaixo qualificado para o(a) Adotante responsavel, que assume integralmente a guarda e o compromisso de bem-estar do animal:
             </p>
 
             <!-- Animal Info Box -->
-            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 grid grid-cols-2 gap-3">
+            <div class="bg-neutral-50 p-4 rounded-lg border border-neutral-200 grid grid-cols-2 gap-3">
                 <div><strong>Nome do Animal:</strong> {{ animal.name }}</div>
                 <div><strong>Especie:</strong> {{ animal.species }}</div>
                 <div><strong>Raca:</strong> {{ animal.breed }}</div>
                 <div><strong>Sexo:</strong> {{ animal.gender }}</div>
                 <div><strong>Idade Aproximada:</strong> {{ animal.age_approx }}</div>
+                <div><strong>Porte:</strong> {{ animal.size }}</div>
+                <div><strong>Microchip:</strong> <span class="font-mono">{{ animal.microchip or 'Nao chipado' }}</span></div>
                 <div><strong>Castracao:</strong> {% if animal.neutered %}Sim, castrado(a){% else %}Compromisso de castracao pendente{% endif %}</div>
             </div>
 
             <!-- Adopter Fillable Fields -->
-            <h2 class="font-bold text-slate-900 uppercase tracking-wider text-xs border-b pb-1 mt-4">
-                Dados do(a) Adotante
-            </h2>
-            <div class="grid grid-cols-2 gap-3 bg-slate-50 p-4 rounded-lg border border-slate-200">
-                <div><strong>Nome Completo:</strong> ____________________________________</div>
-                <div><strong>CPF:</strong> ____________________________</div>
-                <div><strong>Telefone / WhatsApp:</strong> ____________________________</div>
-                <div><strong>Endereco Residencial:</strong> ____________________________</div>
-            </div>
+            <section class="space-y-2.5">
+                <h2 class="font-bold text-neutral-900 uppercase tracking-wider text-[11px] border-b border-neutral-200 pb-1">
+                    Dados do(a) Adotante
+                </h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 bg-neutral-50 p-4 rounded-lg border border-neutral-200">
+                    <div><strong>Nome Completo:</strong> ____________________________________</div>
+                    <div><strong>CPF:</strong> ____________________________</div>
+                    <div><strong>Telefone / WhatsApp:</strong> ____________________________</div>
+                    <div><strong>Endereco Residencial:</strong> ____________________________</div>
+                </div>
+            </section>
 
             <!-- Commitments -->
-            <h2 class="font-bold text-slate-900 uppercase tracking-wider text-xs border-b pb-1 mt-4">
-                Declaracao de Compromisso
-            </h2>
-            <ul class="list-disc pl-5 space-y-1.5 text-slate-600">
-                <li>Garantir abrigo seguro, alimentacao adequada, assistencia veterinaria e afeto ao animal.</li>
-                <li>Nao manter o animal permanentemente acorrentado ou em espaco insalubre.</li>
-                <li>Manter as vacinas polivalente e antirrabica anualmente atualizadas.</li>
-                <li>Permitir o acompanhamento pos-adocao por membros da ONG Patas e Pelos.</li>
-                <li>Comunicar imediatamente a entidade em caso de fuga, doenca grave ou falecimento do animal, nao podendo repassa-lo a terceiros sem previa anuencia.</li>
-            </ul>
+            <section class="space-y-2.5">
+                <h2 class="font-bold text-neutral-900 uppercase tracking-wider text-[11px] border-b border-neutral-200 pb-1">
+                    Declaracao de Compromisso
+                </h2>
+                <ul class="list-disc pl-5 space-y-1.5 text-neutral-600">
+                    <li>Garantir abrigo seguro, alimentacao adequada, assistencia veterinaria e afeto ao animal.</li>
+                    <li>Nao manter o animal permanentemente acorrentado ou em espaco insalubre.</li>
+                    <li>Manter as vacinas polivalente e antirrabica anualmente atualizadas.</li>
+                    <li>Permitir o acompanhamento pos-adocao por membros da ONG Patas e Pelos.</li>
+                    <li>Comunicar imediatamente a entidade em caso de fuga, doenca grave ou falecimento do animal, nao podendo repassa-lo a terceiros sem previa anuencia.</li>
+                </ul>
+            </section>
 
-            <div class="pt-8 grid grid-cols-2 gap-8 text-center mt-6">
-                <div class="border-t border-slate-400 pt-2">
-                    <p class="font-semibold text-slate-800">Assinatura do(a) Adotante</p>
-                    <p class="text-[10px] text-slate-500">Horizontina/RS, ____ / ____ / 2026</p>
+            <div class="pt-10 grid grid-cols-2 gap-10 text-center mt-6">
+                <div class="border-t border-neutral-400 pt-2">
+                    <p class="font-semibold text-neutral-800">Assinatura do(a) Adotante</p>
+                    <p class="text-[10px] text-neutral-500 mt-0.5">Horizontina/RS, ____ / ____ / 2026</p>
                 </div>
-                <div class="border-t border-slate-400 pt-2">
-                    <p class="font-semibold text-slate-800">ONG Patas e Pelos</p>
-                    <p class="text-[10px] text-slate-500">Responsavel pelo Encaminhamento</p>
+                <div class="border-t border-neutral-400 pt-2">
+                    <p class="font-semibold text-neutral-800">ONG Patas e Pelos</p>
+                    <p class="text-[10px] text-neutral-500 mt-0.5">Responsavel pelo Encaminhamento</p>
                 </div>
             </div>
         </div>
-    </div>
+    </article>
+
 </body>
 </html>

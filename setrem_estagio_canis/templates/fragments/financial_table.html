@@ -1,0 +1,67 @@
+{% if transactions %}
+<div class="bg-surface border border-subtle rounded-xl overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-subtle text-sm">
+            <thead class="bg-elevated/70 text-ink-secondary text-xs">
+                <tr>
+                    <th class="px-5 py-3.5 text-left font-semibold">Data</th>
+                    <th class="px-4 py-3.5 text-left font-semibold">Descricao / Categoria</th>
+                    <th class="px-4 py-3.5 text-left font-semibold">Forma</th>
+                    <th class="px-4 py-3.5 text-left font-semibold">Status</th>
+                    <th class="px-5 py-3.5 text-right font-semibold">Valor</th>
+                    <th class="px-5 py-3.5 text-right font-semibold">Acao</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-subtle/70">
+                {% for tx in transactions %}
+                <tr class="hover:bg-elevated/50 transition-colors">
+                    <td class="px-5 py-3.5 font-mono text-xs text-ink-secondary whitespace-nowrap tabular">
+                        {{ tx.tx_date }}
+                    </td>
+                    <td class="px-4 py-3.5">
+                        <p class="text-xs font-semibold text-ink-primary">{{ tx.description }}</p>
+                        <p class="text-[11px] text-ink-muted mt-0.5">
+                            {{ tx.category }}{% if tx.related_animal %} · Animal: {{ tx.related_animal }}{% endif %}
+                        </p>
+                    </td>
+                    <td class="px-4 py-3.5 text-xs text-ink-secondary whitespace-nowrap">
+                        {{ tx.payment_method }}
+                    </td>
+                    <td class="px-4 py-3.5 whitespace-nowrap">
+                        {% if tx.status == 'Pago' %}
+                        <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-patas-green/15 text-patas-green border border-patas-green/25">
+                            Pago
+                        </span>
+                        {% else %}
+                        <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-patas-orange/15 text-patas-orange border border-patas-orange/25">
+                            Pendente
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-5 py-3.5 text-right font-mono text-xs font-semibold whitespace-nowrap tabular {% if tx.tx_type == 'Entrada' %}text-patas-green{% else %}text-red-400{% endif %}">
+                        {% if tx.tx_type == 'Entrada' %}+{% else %}-{% endif %} {{ tx.amount_brl }}
+                    </td>
+                    <td class="px-5 py-3.5 text-right whitespace-nowrap">
+                        {% if tx.status == 'Pendente' %}
+                        <form action="/financeiro/lancamentos/{{ tx.id }}/pagar" method="post" class="inline">
+                            <button
+                                type="submit"
+                                class="px-2.5 py-1 rounded-lg bg-patas-green hover:bg-patas-green-hover text-[#061c14] text-[11px] font-semibold transition-colors">
+                                Marcar Pago
+                            </button>
+                        </form>
+                        {% else %}
+                        <span class="text-[11px] text-ink-muted">—</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="bg-surface border border-subtle rounded-xl p-10 text-center space-y-1">
+    <p class="text-sm font-medium text-ink-primary">Nenhum lancamento encontrado para o filtro selecionado.</p>
+</div>
+{% endif %}

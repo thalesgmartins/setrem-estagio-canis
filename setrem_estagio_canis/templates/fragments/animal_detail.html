@@ -1,111 +1,88 @@
-<div class="fixed inset-0 z-50 overflow-y-auto bg-slate-900 bg-opacity-60 flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full border border-slate-200 overflow-hidden">
-        <!-- Modal Header -->
-        <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
-            <div>
-                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-                    Prontuario Clinico: {{ animal.name }}
-                </h3>
-                <p class="text-xs text-slate-500">
-                    {{ animal.species }} | {{ animal.breed }} | {{ animal.age_approx }} | {{ animal.gender }}
-                </p>
-            </div>
-            <button
-                onclick="document.getElementById('modal-container').innerHTML = ''"
-                class="text-slate-400 hover:text-slate-600 p-1 text-sm font-bold">
-                Fechar [X]
-            </button>
-        </div>
+<div
+    class="fixed inset-0 z-50 bg-black/75 backdrop-blur-[2px] flex justify-end sm:items-center sm:justify-center p-0 sm:p-4 overflow-y-auto"
+    onclick="if (event.target === this) closeModal();">
+    <div class="bg-surface border border-subtle sm:rounded-2xl w-full max-w-3xl max-h-screen sm:max-h-[88vh] flex flex-col overflow-hidden shadow-2xl">
 
-        <!-- Modal Body -->
-        <div class="p-6 space-y-6 max-h-[75vh] overflow-y-auto text-sm">
-            <!-- General Info Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-lg border border-slate-200">
-                <div>
-                    <span class="block text-xs text-slate-500 font-semibold uppercase">Status Operacional</span>
-                    <span class="font-medium text-slate-800">{{ animal.status }}</span>
+        <!-- Animal Profile Header -->
+        <div class="px-6 py-5 border-b border-subtle bg-elevated/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-4 min-w-0">
+                <div class="w-14 h-14 rounded-2xl bg-elevated border border-subtle flex items-center justify-center text-lg font-bold text-ink-primary shrink-0">
+                    {{ animal.name[:2]|upper }}
                 </div>
-                <div>
-                    <span class="block text-xs text-slate-500 font-semibold uppercase">Localizacao Atual</span>
-                    <span class="font-medium text-slate-800">{{ animal.location }}</span>
-                </div>
-                <div>
-                    <span class="block text-xs text-slate-500 font-semibold uppercase">Data de Resgate/Entrada</span>
-                    <span class="font-medium text-slate-800">{{ animal.intake_date }}</span>
-                </div>
-                <div>
-                    <span class="block text-xs text-slate-500 font-semibold uppercase">Condicao Reprodutiva</span>
-                    <span class="font-medium text-slate-800">
-                        {% if animal.neutered %}Castrado(a) com registro{% else %}Pendente de Castracao{% endif %}
-                    </span>
-                </div>
-            </div>
-
-            <!-- Rescue & Background Details -->
-            <div>
-                <h4 class="font-bold text-slate-900 mb-1 border-b pb-1 text-xs uppercase tracking-wide">
-                    Historico do Resgate
-                </h4>
-                <p class="text-slate-700 bg-amber-50 border-l-4 border-amber-400 p-3 rounded-r text-xs">
-                    {{ animal.rescue_notes }}
-                </p>
-            </div>
-
-            <!-- Vaccines Section -->
-            <div>
-                <h4 class="font-bold text-slate-900 mb-2 border-b pb-1 text-xs uppercase tracking-wide">
-                    Imunizacao e Vacinas Registradas
-                </h4>
-                {% if animal.vaccines %}
-                <div class="space-y-2">
-                    {% for vac in animal.vaccines %}
-                    <div class="flex justify-between items-center p-3 bg-slate-50 rounded border border-slate-200">
-                        <div>
-                            <span class="font-semibold text-slate-800">{{ vac.name }}</span>
-                            <span class="block text-xs text-slate-500">Lote: {{ vac.lot }} | Aplicada em: {{ vac.date_applied }}</span>
-                        </div>
-                        <div class="text-right">
-                            <span class="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-1 rounded border border-emerald-200">
-                                Reforco: {{ vac.next_due_date }}
-                            </span>
-                        </div>
+                <div class="min-w-0">
+                    <div class="flex items-center gap-2.5 flex-wrap">
+                        <h3 class="text-lg font-bold text-ink-primary tracking-tight">
+                            Prontuario Clinico: {{ animal.name }}
+                        </h3>
+                        {% if animal.status == 'Em Tratamento' %}
+                        <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-patas-orange/15 text-patas-orange border border-patas-orange/25">
+                            Em Tratamento
+                        </span>
+                        {% elif animal.status == 'Lar Temporario' %}
+                        <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-patas-blue/15 text-patas-blue border border-patas-blue/25">
+                            Lar Temporario
+                        </span>
+                        {% elif animal.status in ['Disponivel para Adocao', 'Adotado'] %}
+                        <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-patas-green/15 text-patas-green border border-patas-green/25">
+                            {{ animal.status }}
+                        </span>
+                        {% else %}
+                        <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-elevated text-ink-secondary border border-subtle">
+                            {{ animal.status }}
+                        </span>
+                        {% endif %}
                     </div>
-                    {% endfor %}
+                    <p class="text-xs text-ink-secondary mt-1">
+                        {{ animal.species }} · {{ animal.breed }} · {{ animal.size }} · {{ animal.age_approx }} · {{ animal.gender }}
+                    </p>
                 </div>
-                {% else %}
-                <p class="text-xs text-slate-500 italic">Nenhuma vacina registrada ate o momento.</p>
-                {% endif %}
             </div>
 
-            <!-- Clinical & Treatment Notes -->
+            <div class="flex items-center gap-2 shrink-0">
+                <a
+                    href="/termo-adocao/{{ animal.id }}"
+                    target="_blank"
+                    class="px-3.5 py-2 rounded-xl bg-patas-green hover:bg-patas-green-hover text-[#061c14] text-xs font-semibold transition-colors">
+                    Emitir Termo de Adocao
+                </a>
+                <button
+                    type="button"
+                    onclick="closeModal()"
+                    aria-label="Fechar prontuario"
+                    class="p-2 rounded-xl bg-elevated hover:bg-subtle border border-subtle text-ink-secondary hover:text-ink-primary transition-colors">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Vital Strip -->
+        <div class="px-6 py-3 bg-canvas/60 border-b border-subtle grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
             <div>
-                <h4 class="font-bold text-slate-900 mb-2 border-b pb-1 text-xs uppercase tracking-wide">
-                    Evolucao Clinica & Procedimentos Veterinarios
-                </h4>
-                <ul class="space-y-2">
-                    {% for note in animal.medical_notes %}
-                    <li class="flex items-start text-xs text-slate-700 bg-slate-50 p-2.5 rounded border border-slate-200">
-                        <span class="font-bold text-emerald-600 mr-2">></span>
-                        <span>{{ note }}</span>
-                    </li>
-                    {% endfor %}
-                </ul>
+                <span class="block text-[11px] text-ink-muted">Entrada / Resgate</span>
+                <span class="font-mono font-medium text-ink-primary tabular">{{ animal.intake_date }}</span>
+            </div>
+            <div>
+                <span class="block text-[11px] text-ink-muted">Castracao</span>
+                <span class="font-medium {% if animal.neutered %}text-patas-green{% else %}text-patas-orange{% endif %}">
+                    {% if animal.neutered %}Castrado(a){% else %}Pendente{% endif %}
+                </span>
+            </div>
+            <div>
+                <span class="block text-[11px] text-ink-muted">Microchip</span>
+                <span class="font-mono text-ink-secondary tabular">{{ animal.microchip or 'Nao registrado' }}</span>
+            </div>
+            <div>
+                <span class="block text-[11px] text-ink-muted">Localizacao</span>
+                <span class="text-ink-primary truncate block" title="{{ animal.location }}">{{ animal.location }}</span>
             </div>
         </div>
 
-        <!-- Modal Footer -->
-        <div class="bg-slate-50 px-6 py-3 border-t border-slate-200 flex justify-end gap-3">
-            <button
-                onclick="document.getElementById('modal-container').innerHTML = ''"
-                class="px-4 py-2 text-xs font-semibold rounded-md bg-slate-200 hover:bg-slate-300 text-slate-700 transition-colors">
-                Fechar
-            </button>
-            <a
-                href="/termo-adocao/{{ animal.id }}"
-                target="_blank"
-                class="px-4 py-2 text-xs font-semibold rounded-md bg-emerald-600 hover:bg-emerald-700 text-white transition-colors">
-                Gerar Termo de Adocao
-            </a>
+        <!-- HTMX Tabs + Body -->
+        <div id="prontuario-tab-panel" class="flex-1 overflow-y-auto flex flex-col">
+            {% include "fragments/animal_detail_tabs.html" %}
         </div>
+
     </div>
 </div>

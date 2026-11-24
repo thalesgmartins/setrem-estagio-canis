@@ -1,0 +1,229 @@
+<!-- HTMX Tab Navigation -->
+<div class="px-6 pt-3 border-b border-subtle flex items-center justify-between gap-4 bg-surface sticky top-0 z-10">
+    <div class="flex items-center gap-1" role="tablist">
+        <button
+            type="button"
+            role="tab"
+            hx-get="/animais/{{ animal.id }}/prontuario/aba/clinico"
+            hx-target="#prontuario-tab-panel"
+            hx-swap="innerHTML"
+            class="px-3.5 py-2.5 text-xs font-semibold border-b-2 transition-colors {% if active_tab == 'clinico' %}border-patas-green text-patas-green{% else %}border-transparent text-ink-secondary hover:text-ink-primary{% endif %}">
+            Historico Clinico
+        </button>
+        <button
+            type="button"
+            role="tab"
+            hx-get="/animais/{{ animal.id }}/prontuario/aba/vacinas"
+            hx-target="#prontuario-tab-panel"
+            hx-swap="innerHTML"
+            class="px-3.5 py-2.5 text-xs font-semibold border-b-2 transition-colors {% if active_tab == 'vacinas' %}border-patas-green text-patas-green{% else %}border-transparent text-ink-secondary hover:text-ink-primary{% endif %}">
+            Vacinas e Vermifugos ({{ animal.vaccines|length }})
+        </button>
+        <button
+            type="button"
+            role="tab"
+            hx-get="/animais/{{ animal.id }}/prontuario/aba/lares"
+            hx-target="#prontuario-tab-panel"
+            hx-swap="innerHTML"
+            class="px-3.5 py-2.5 text-xs font-semibold border-b-2 transition-colors {% if active_tab == 'lares' %}border-patas-green text-patas-green{% else %}border-transparent text-ink-secondary hover:text-ink-primary{% endif %}">
+            Lares Temporarios
+        </button>
+    </div>
+
+    {% if active_tab == 'clinico' %}
+    <button
+        type="button"
+        onclick="const f = document.getElementById('inline-clinical-form'); if (f) f.classList.toggle('hidden');"
+        class="mb-2 px-3 py-1.5 rounded-lg bg-elevated hover:bg-subtle border border-subtle text-[11px] font-semibold text-ink-primary transition-colors">
+        + Novo Atendimento
+    </button>
+    {% endif %}
+</div>
+
+<!-- Tab Content -->
+<div class="p-6 space-y-6 text-sm">
+
+    {% if active_tab == 'clinico' %}
+    <!-- Inline Quick New Clinical Record Form -->
+    <form
+        id="inline-clinical-form"
+        hx-post="/animais/{{ animal.id }}/atendimentos"
+        hx-target="#prontuario-tab-panel"
+        hx-swap="innerHTML"
+        class="hidden p-4 rounded-xl bg-elevated border border-subtle space-y-3">
+        <div class="flex items-center justify-between">
+            <h4 class="text-xs font-semibold text-ink-primary">Registrar Novo Atendimento Clinico</h4>
+            <button
+                type="button"
+                onclick="document.getElementById('inline-clinical-form').classList.add('hidden')"
+                class="text-[11px] text-ink-muted hover:text-ink-primary">
+                Cancelar
+            </button>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <input
+                type="text"
+                name="title"
+                required
+                placeholder="Procedimento (ex: Consulta, Curativo, Medicacao)"
+                class="px-3 py-2 text-xs bg-surface border border-subtle rounded-lg text-ink-primary placeholder-ink-muted focus:outline-none focus:border-patas-blue focus:ring-1 focus:ring-patas-blue">
+            <input
+                type="text"
+                name="veterinarian"
+                required
+                placeholder="Veterinario responsavel / CRMV"
+                class="px-3 py-2 text-xs bg-surface border border-subtle rounded-lg text-ink-primary placeholder-ink-muted focus:outline-none focus:border-patas-blue focus:ring-1 focus:ring-patas-blue">
+        </div>
+        <textarea
+            rows="2"
+            name="notes"
+            required
+            placeholder="Evolucao clinica, dosagens e observacoes..."
+            class="w-full px-3 py-2 text-xs bg-surface border border-subtle rounded-lg text-ink-primary placeholder-ink-muted focus:outline-none focus:border-patas-blue focus:ring-1 focus:ring-patas-blue"></textarea>
+        <div class="flex items-center justify-end gap-3">
+            <button
+                type="submit"
+                class="px-3.5 py-1.5 rounded-lg bg-patas-green hover:bg-patas-green-hover text-[#061c14] text-xs font-semibold transition-colors">
+                Salvar Prontuario
+            </button>
+        </div>
+    </form>
+
+    <!-- Rescue Context -->
+    <div class="p-4 rounded-xl bg-elevated/60 border border-subtle border-l-2 border-l-patas-orange space-y-1">
+        <span class="block text-[11px] font-semibold uppercase tracking-wider text-patas-orange">
+            Historico do Resgate
+        </span>
+        <p class="text-xs text-ink-primary leading-relaxed">{{ animal.rescue_notes }}</p>
+    </div>
+
+    <!-- Chronological Clinical Timeline -->
+    <div class="space-y-3">
+        <h4 class="text-xs font-semibold uppercase tracking-wider text-ink-secondary">
+            Linha do Tempo Clinica
+        </h4>
+        <div class="border border-subtle rounded-xl overflow-hidden divide-y divide-subtle/70">
+            {% for ev in animal.clinical_events %}
+            <div class="p-4 bg-surface hover:bg-elevated/50 transition-colors flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                <div class="space-y-1">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <span class="px-2 py-0.5 rounded text-[11px] font-medium bg-elevated text-ink-secondary border border-subtle">
+                            {{ ev.category }}
+                        </span>
+                        <p class="text-xs font-semibold text-ink-primary">{{ ev.title }}</p>
+                    </div>
+                    <p class="text-xs text-ink-secondary leading-relaxed">{{ ev.notes }}</p>
+                    <p class="text-[11px] text-ink-muted">{{ ev.veterinarian }}</p>
+                </div>
+                <span class="font-mono text-xs text-ink-muted tabular shrink-0">{{ ev.date }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Compact Immunization Summary -->
+    {% if animal.vaccines %}
+    <div class="space-y-2.5">
+        <div class="flex items-center justify-between">
+            <h4 class="text-xs font-semibold uppercase tracking-wider text-ink-secondary">
+                Imunizacao Registrada
+            </h4>
+            <button
+                type="button"
+                hx-get="/animais/{{ animal.id }}/prontuario/aba/vacinas"
+                hx-target="#prontuario-tab-panel"
+                hx-swap="innerHTML"
+                class="text-xs font-medium text-patas-blue hover:underline">
+                Ver detalhes de lotes
+            </button>
+        </div>
+        <div class="flex flex-wrap gap-2">
+            {% for vac in animal.vaccines %}
+            <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs bg-elevated border border-subtle">
+                <span class="font-medium text-ink-primary">{{ vac.name }}</span>
+                <span class="font-mono text-[11px] text-ink-muted tabular">{{ vac.next_due_date }}</span>
+            </span>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% elif active_tab == 'vacinas' %}
+    <!-- Vaccines & Dewormers Table -->
+    <div class="space-y-3">
+        <h4 class="text-xs font-semibold uppercase tracking-wider text-ink-secondary">
+            Carteira de Vacinas e Vermifugos
+        </h4>
+        {% if animal.vaccines %}
+        <div class="border border-subtle rounded-xl overflow-hidden">
+            <table class="min-w-full divide-y divide-subtle text-xs">
+                <thead class="bg-elevated/70 text-ink-secondary">
+                    <tr>
+                        <th class="px-4 py-3 text-left font-semibold">Imunizante</th>
+                        <th class="px-4 py-3 text-left font-semibold">Lote</th>
+                        <th class="px-4 py-3 text-left font-semibold">Aplicacao</th>
+                        <th class="px-4 py-3 text-left font-semibold">Proximo Reforco</th>
+                        <th class="px-4 py-3 text-right font-semibold">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-subtle/70">
+                    {% for vac in animal.vaccines %}
+                    <tr class="hover:bg-elevated/40 transition-colors">
+                        <td class="px-4 py-3">
+                            <p class="font-semibold text-ink-primary">{{ vac.name }}</p>
+                            <p class="text-[11px] text-ink-muted">{{ vac.record_type }}</p>
+                        </td>
+                        <td class="px-4 py-3 font-mono text-ink-secondary tabular">{{ vac.lot }}</td>
+                        <td class="px-4 py-3 font-mono text-ink-secondary tabular">{{ vac.date_applied }}</td>
+                        <td class="px-4 py-3 font-mono text-ink-primary tabular">{{ vac.next_due_date }}</td>
+                        <td class="px-4 py-3 text-right">
+                            {% if vac.status == 'Em dia' %}
+                            <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-patas-green/15 text-patas-green border border-patas-green/25">
+                                Vacinado
+                            </span>
+                            {% else %}
+                            <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-patas-orange/15 text-patas-orange border border-patas-orange/25">
+                                {{ vac.status }}
+                            </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-xs text-ink-secondary">Nenhuma vacina ou vermifugo registrado ate o momento.</p>
+        {% endif %}
+    </div>
+
+    {% elif active_tab == 'lares' %}
+    <!-- Foster & Location History -->
+    <div class="space-y-4">
+        <div class="p-4 rounded-xl bg-elevated/70 border border-subtle flex items-center justify-between gap-4">
+            <div>
+                <span class="block text-[11px] text-ink-muted uppercase tracking-wider">Alocacao Atual</span>
+                <p class="text-sm font-semibold text-ink-primary mt-0.5">{{ animal.location }}</p>
+            </div>
+            <span class="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-patas-blue/15 text-patas-blue border border-patas-blue/25">
+                {{ animal.status }}
+            </span>
+        </div>
+
+        <div class="space-y-2.5">
+            <h4 class="text-xs font-semibold uppercase tracking-wider text-ink-secondary">
+                Historico de Acolhimento e Movimentacoes
+            </h4>
+            <ul class="space-y-2">
+                {% for entry in animal.foster_history %}
+                <li class="p-3.5 rounded-xl bg-surface border border-subtle text-xs text-ink-primary flex items-center gap-3">
+                    <span class="w-2 h-2 rounded-full bg-patas-blue shrink-0"></span>
+                    <span>{{ entry }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
