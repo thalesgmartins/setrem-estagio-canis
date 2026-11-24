@@ -37,6 +37,13 @@ ADMIN_EMAILS: frozenset[str] = frozenset(
 ONG_WHATSAPP = os.getenv("ONG_WHATSAPP", "5555996112233")
 ONG_CITY = os.getenv("ONG_CITY", "Horizontina/RS")
 
+# Populate demo mock data on empty database (disabled by default for clean DB)
+SEED_DEMO_DATA = os.getenv("SEED_DEMO_DATA", "false").strip().lower() in {
+    "1",
+    "true",
+    "yes",
+}
+
 
 def google_oauth_configured() -> bool:
     """Return True when Google OAuth credentials are configured in the environment.

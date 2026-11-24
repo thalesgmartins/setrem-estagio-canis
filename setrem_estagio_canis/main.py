@@ -13,6 +13,7 @@ from fastapi.staticfiles import StaticFiles
 
 from setrem_estagio_canis.api import auth, web
 from setrem_estagio_canis.api.web import calculate_metrics
+from setrem_estagio_canis.core.config import SEED_DEMO_DATA
 from setrem_estagio_canis.database.models import Base
 from setrem_estagio_canis.database.repository import seed_initial_data
 from setrem_estagio_canis.database.session import SessionLocal, engine
@@ -25,7 +26,7 @@ STATIC_DIR = BASE_DIR / "static"
 
 
 def init_database() -> None:
-    """Apply Alembic migrations (or create_all in tests) and seed initial data."""
+    """Apply Alembic migrations (or create_all in tests) and seed if enabled."""
     ini_path = PROJECT_ROOT / "alembic.ini"
     if not os.getenv("TESTING") and ini_path.exists():
         try:
@@ -40,8 +41,9 @@ def init_database() -> None:
     else:
         Base.metadata.create_all(bind=engine)
 
-    with SessionLocal() as db:
-        seed_initial_data(db)
+    if SEED_DEMO_DATA:
+        with SessionLocal() as db:
+            seed_initial_data(db)
 
 
 @asynccontextmanager
