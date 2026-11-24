@@ -4,20 +4,24 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "setrem-estagio-canis"
-version = "0.1.0"
-description = "Sistema de Gestão para centralizar resgates, adoções e recursos na Patas e Pelos"
+version = "0.2.0"
+description = "Sistema de Gestao para centralizar resgates, adocoes e recursos na Patas e Pelos"
 readme = "README.md"
 requires-python = ">=3.10"
 
 dependencies = [
+    "alembic>=1.13.0",
+    "bcrypt>=4.0.0",
     "fastapi>=0.142.1",
     "jinja2>=3.1.6",
     "orjson>=3.12.0",
+    "psycopg[binary]>=3.1.0",
+    "pyjwt>=2.8.0",
+    "python-dotenv>=1.0.0",
     "python-multipart>=0.0.32",
+    "sqlalchemy>=2.0.0",
     "uvicorn>=0.54.0",
 ]
-
-#[project.scripts]
 
 [tool.setuptools.packages.find]
 where = ["."]
@@ -31,7 +35,11 @@ line-length = 88
 target-version = "py310"
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "I", "UP", "B", "SIM"]  # erros, imports, upgrades, bugbear, simplify
+select = ["E", "F", "W", "I", "UP", "B", "SIM"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["setrem_estagio_canis"]
+known-third-party = ["alembic"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -40,4 +48,6 @@ testpaths = ["tests"]
 dev = [
     "httpx>=0.28.1",
     "mypy>=2.3.1",
+    "pytest>=8.0.0",
+    "ruff>=0.11.0",
 ]
