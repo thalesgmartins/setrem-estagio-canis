@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.3.0](https://github.com/thalesgmartins/setrem-estagio-canis/compare/v0.2.0...v0.3.0) (2026-11-25)
+
+
+### Features
+
+* **media:** add interactive 1:1 square image cropper and 1080x1080 WebP standard ([b056865](https://github.com/thalesgmartins/setrem-estagio-canis/commit/b05686528a9e8a47adb635631e5f2434d867271c))
+* **media:** add WebP downscaling for animal photos, stock images, and user avatars ([bc93bd0](https://github.com/thalesgmartins/setrem-estagio-canis/commit/bc93bd013b8ce8ca4ba57fada190114f3779187a))
+* **ui:** polish foster-to-adoption flow, custom selects, light mode, and PT-BR orthography ([cfc3c09](https://github.com/thalesgmartins/setrem-estagio-canis/commit/cfc3c09c7169684608621e57ceb6b0b295573fb9))
+
 ## [0.2.0](https://github.com/thalesgmartins/setrem-estagio-canis/compare/v0.1.0...v0.2.0) (2026-11-24)
 
 
