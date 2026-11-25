@@ -1,7 +1,10 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: 'class',
-  content: ["./setrem_estagio_canis/templates/**/*.html"],
+  content: [
+    "./setrem_estagio_canis/templates/**/*.html",
+    "./setrem_estagio_canis/static/js/image-cropper.js",
+  ],
   theme: {
     extend: {
       fontFamily: {

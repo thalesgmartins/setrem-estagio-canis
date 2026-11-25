@@ -247,13 +247,13 @@ def test_animal_photos_downscale_primary_and_gallery() -> None:
         assert len(photos) == 2
         first_id, second_id = photos[0].id, photos[1].id
 
-    # Served publicly as downscaled WebP (max 1024px)
+    # Served publicly as square downscaled WebP (1080x1080 max)
     anon = TestClient(app)
     media_resp = anon.get(f"/media/animais/{first_id}")
     assert media_resp.status_code == 200
     assert media_resp.headers["content-type"] == "image/webp"
     with Image.open(io.BytesIO(media_resp.content)) as resized:
-        assert max(resized.size) <= 1024
+        assert resized.size == (1080, 1080)
 
     # Switch primary photo and verify public catalog detail renders both
     switch_resp = client.post(
@@ -447,5 +447,6 @@ def test_user_profile_settings_avatar_and_local_assets() -> None:
         "/static/favicon.svg",
         "/static/css/materialdesignicons.min.css",
         "/static/js/htmx.min.js",
+        "/static/js/image-cropper.js",
     ]:
         assert client.get(asset_path).status_code == 200

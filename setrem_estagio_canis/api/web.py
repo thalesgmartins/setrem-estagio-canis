@@ -214,7 +214,7 @@ async def _store_animal_uploads(
             continue
         filename = f"animal_{animal_id}_{uuid.uuid4().hex[:10]}.webp"
         dest = animals_dir / filename
-        if save_resized_webp(raw, dest, max_dimension=1024, quality=80):
+        if save_resized_webp(raw, dest, max_dimension=1080, quality=82, square=True):
             add_animal_photo(db, animal_id=animal_id, filename=filename)
 
 
@@ -737,7 +737,7 @@ async def create_stock_item_route(
         if raw and len(raw) <= MAX_IMAGE_UPLOAD_BYTES:
             candidate = f"stock_{uuid.uuid4().hex[:10]}.webp"
             dest = UPLOAD_DIR / "stock" / candidate
-            if save_resized_webp(raw, dest, max_dimension=512, quality=80):
+            if save_resized_webp(raw, dest, max_dimension=512, quality=82, square=True):
                 image_filename = candidate
 
     create_stock_item(

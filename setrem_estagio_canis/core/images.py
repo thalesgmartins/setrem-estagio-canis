@@ -14,16 +14,18 @@ MAX_IMAGE_UPLOAD_BYTES = 15 * 1024 * 1024
 def save_resized_webp(
     raw_bytes: bytes,
     dest_path: Path,
-    max_dimension: int = 1024,
-    quality: int = 80,
+    max_dimension: int = 1080,
+    quality: int = 82,
+    square: bool = False,
 ) -> bool:
-    """Validate, EXIF-orient, downscale, and save an image as compressed WebP.
+    """Validate, EXIF-orient, resize/crop, and save an image as compressed WebP.
 
     Args:
         raw_bytes: Raw uploaded image bytes.
         dest_path: Target file path on disk (parent directories are created).
-        max_dimension: Maximum width or height in pixels.
+        max_dimension: Maximum width/height (or square side length) in pixels.
         quality: WebP compression quality (1-100).
+        square: When True, enforce an exact 1:1 square aspect ratio via center fit.
 
     Returns:
         True when the image was successfully processed and written, else False.
@@ -36,9 +38,18 @@ def save_resized_webp(
             processed: Image.Image = ImageOps.exif_transpose(opened)
             if processed.mode not in ("RGB", "RGBA"):
                 processed = processed.convert("RGB")
-            processed.thumbnail(
-                (max_dimension, max_dimension), Image.Resampling.LANCZOS
-            )
+            if square:
+                side = min(max_dimension, min(processed.size))
+                processed = ImageOps.fit(
+                    processed,
+                    (side, side),
+                    method=Image.Resampling.LANCZOS,
+                )
+            else:
+                processed.thumbnail(
+                    (max_dimension, max_dimension),
+                    Image.Resampling.LANCZOS,
+                )
             dest_path.parent.mkdir(parents=True, exist_ok=True)
             processed.save(dest_path, format="WEBP", quality=quality, method=6)
         return True

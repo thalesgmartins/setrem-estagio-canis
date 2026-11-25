@@ -404,7 +404,9 @@ async def update_profile(
         content = await foto.read(_MAX_AVATAR_BYTES + 1)
         if 0 < len(content) <= _MAX_AVATAR_BYTES:
             dest = get_avatar_path(user.id)
-            if not save_resized_webp(content, dest, max_dimension=384, quality=82):
+            if not save_resized_webp(
+                content, dest, max_dimension=384, quality=82, square=True
+            ):
                 dest.write_bytes(content)
 
     return RedirectResponse(
