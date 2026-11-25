@@ -29,6 +29,7 @@ from setrem_estagio_canis.core.config import (
     UPLOAD_DIR,
     google_oauth_configured,
 )
+from setrem_estagio_canis.core.images import save_resized_webp
 from setrem_estagio_canis.core.security import (
     create_access_token,
     decode_access_token,
@@ -402,7 +403,9 @@ async def update_profile(
     if foto and foto.filename:
         content = await foto.read(_MAX_AVATAR_BYTES + 1)
         if 0 < len(content) <= _MAX_AVATAR_BYTES:
-            get_avatar_path(user.id).write_bytes(content)
+            dest = get_avatar_path(user.id)
+            if not save_resized_webp(content, dest, max_dimension=384, quality=82):
+                dest.write_bytes(content)
 
     return RedirectResponse(
         url="/configuracoes?ok=Perfil+atualizado+com+sucesso",
@@ -421,6 +424,24 @@ def get_user_avatar(
 
     return Response(
         content=path.read_bytes(),
-        media_type="image/png",
+        media_type="image/webp",
+        headers={"Cache-Control": "no-cache"},
+    )
+
+
+@router.get("/auth/avatar/{user_id}")
+def get_specific_user_avatar(
+    user_id: int,
+    user: Annotated[Usuario, Depends(require_active_user)],
+) -> Response:
+    """Serve a specific user's custom avatar for internal listings."""
+    _ = user
+    path = get_avatar_path(user_id)
+    if not path.exists() or path.stat().st_size == 0:
+        raise HTTPException(status_code=404, detail="Avatar nao cadastrado.")
+
+    return Response(
+        content=path.read_bytes(),
+        media_type="image/webp",
         headers={"Cache-Control": "no-cache"},
     )

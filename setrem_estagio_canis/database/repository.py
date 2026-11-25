@@ -1,5 +1,6 @@
 """Database repositories and idempotent initial seed for the Canis system."""
 
+import unicodedata
 from dataclasses import dataclass
 
 from sqlalchemy import select
@@ -10,6 +11,7 @@ from setrem_estagio_canis.core.security import hash_password
 from setrem_estagio_canis.database.models import (
     AdoptionTerm,
     Animal,
+    AnimalPhoto,
     ClinicalEvent,
     FinancialTransaction,
     StockItem,
@@ -204,23 +206,30 @@ def update_user_profile(
 # ---------------------------------------------------------------------------
 
 
+def _fold(text: str) -> str:
+    """Normalize accents and case for accent-insensitive filtering."""
+    normalized = unicodedata.normalize("NFKD", text.strip().lower())
+    return "".join(ch for ch in normalized if not unicodedata.combining(ch))
+
+
 def list_animals(
     db: Session,
     query: str = "",
     status_filter: str = "",
 ) -> list[Animal]:
-    """List animals with vaccines and clinical events eagerly loaded."""
+    """List animals with photos, vaccines, and clinical events eagerly loaded."""
     stmt = (
         select(Animal)
         .options(
+            selectinload(Animal.photos),
             selectinload(Animal.vaccines),
             selectinload(Animal.clinical_events),
         )
         .order_by(Animal.id.asc())
     )
     animals = list(db.scalars(stmt).all())
-    q = query.strip().lower()
-    st = status_filter.strip()
+    q = _fold(query)
+    st = _fold(status_filter)
 
     if not q and not st:
         return animals
@@ -230,13 +239,13 @@ def list_animals(
         for a in animals
         if (
             not q
-            or q in a.name.lower()
-            or q in a.breed.lower()
-            or q in a.species.lower()
-            or q in a.location.lower()
-            or q in a.microchip.lower()
+            or q in _fold(a.name)
+            or q in _fold(a.breed)
+            or q in _fold(a.species)
+            or q in _fold(a.location)
+            or q in _fold(a.microchip)
         )
-        and (not st or a.status == st)
+        and (not st or _fold(a.status) == st)
     ]
 
 
@@ -246,29 +255,101 @@ def list_adoptable_animals(
     size: str = "",
 ) -> list[Animal]:
     """List animals publicly available for adoption."""
-    animals = list_animals(db, status_filter="Disponivel para Adocao")
-    sp = species.strip().lower()
-    sz = size.strip().lower()
+    animals = [
+        a for a in list_animals(db) if _fold(a.status) == "disponivel para adocao"
+    ]
+    sp = _fold(species)
+    sz = _fold(size)
 
     return [
         a
         for a in animals
-        if (not sp or a.species.lower() == sp)
-        and (not sz or a.size_category.lower() == sz)
+        if (not sp or _fold(a.species) == sp)
+        and (not sz or _fold(a.size_category) == sz)
     ]
 
 
 def get_animal_by_id(db: Session, animal_id: int) -> Animal | None:
-    """Retrieve a single animal with related vaccines and clinical events."""
+    """Retrieve a single animal with related photos, vaccines, and clinical events."""
     stmt = (
         select(Animal)
         .where(Animal.id == animal_id)
         .options(
+            selectinload(Animal.photos),
             selectinload(Animal.vaccines),
             selectinload(Animal.clinical_events),
         )
     )
     return db.scalar(stmt)
+
+
+def add_animal_photo(
+    db: Session,
+    animal_id: int,
+    filename: str,
+    is_primary: bool = False,
+) -> AnimalPhoto:
+    """Attach a downscaled photo record to an animal."""
+    existing_count = len(
+        list(
+            db.scalars(
+                select(AnimalPhoto).where(AnimalPhoto.animal_id == animal_id)
+            ).all()
+        )
+    )
+    photo = AnimalPhoto(
+        animal_id=animal_id,
+        filename=filename,
+        is_primary=is_primary or existing_count == 0,
+    )
+    db.add(photo)
+    db.commit()
+    db.refresh(photo)
+    return photo
+
+
+def get_animal_photo_by_id(db: Session, photo_id: int) -> AnimalPhoto | None:
+    """Retrieve a single animal photo record by ID."""
+    return db.get(AnimalPhoto, photo_id)
+
+
+def set_primary_animal_photo(db: Session, animal_id: int, photo_id: int) -> bool:
+    """Mark one photo as the primary photo for an animal."""
+    photos = list(
+        db.scalars(select(AnimalPhoto).where(AnimalPhoto.animal_id == animal_id)).all()
+    )
+    found = False
+    for photo in photos:
+        if photo.id == photo_id:
+            photo.is_primary = True
+            found = True
+        else:
+            photo.is_primary = False
+    if found:
+        db.commit()
+    return found
+
+
+def delete_animal_photo(db: Session, animal_id: int, photo_id: int) -> str | None:
+    """Delete a photo record and return its filename for disk cleanup."""
+    photo = db.get(AnimalPhoto, photo_id)
+    if photo is None or photo.animal_id != animal_id:
+        return None
+    filename = photo.filename
+    was_primary = photo.is_primary
+    db.delete(photo)
+    db.commit()
+
+    if was_primary:
+        remaining = db.scalar(
+            select(AnimalPhoto)
+            .where(AnimalPhoto.animal_id == animal_id)
+            .order_by(AnimalPhoto.id.asc())
+        )
+        if remaining is not None:
+            remaining.is_primary = True
+            db.commit()
+    return filename
 
 
 def create_animal(
@@ -278,7 +359,7 @@ def create_animal(
     size: str,
     location: str,
     rescue_notes: str,
-    breed: str = "Sem Raca Definida (SRD)",
+    breed: str = "Sem Raça Definida",
     age_approx: str = "A avaliar",
     gender: str = "A avaliar",
     status: str = "Acolhido",
@@ -289,7 +370,7 @@ def create_animal(
     animal = Animal(
         name=name.strip(),
         species=species.strip(),
-        breed=breed.strip() or "Sem Raca Definida (SRD)",
+        breed=breed.strip() or "Sem Raça Definida",
         size=size.strip(),
         age_approx=age_approx.strip() or "A avaliar",
         gender=gender.strip() or "A avaliar",
@@ -299,7 +380,7 @@ def create_animal(
         location=location.strip(),
         microchip="",
         rescue_notes=rescue_notes.strip(),
-        temperament=temperament.strip() or "Em avaliacao comportamental.",
+        temperament=temperament.strip() or "Em avaliação comportamental.",
         foster_history_text=f"Entrada: {location.strip()}",
     )
     db.add(animal)
@@ -397,29 +478,34 @@ def list_stock(
 ) -> list[StockItem]:
     """List inventory lots with optional category and free-text filters."""
     items = list(db.scalars(select(StockItem).order_by(StockItem.id.asc())).all())
-    selected_cat = category.strip().lower()
-    q = query.strip().lower()
+    selected_cat = _fold(category)
+    q = _fold(query)
     medicine_cats = {"antibiotico", "anti-inflamatorio", "antiparasitario"}
 
     filtered: list[StockItem] = []
     for item in items:
-        cat_lower = item.category.lower()
+        cat_folded = _fold(item.category)
         if selected_cat == "medicamentos":
-            matches_cat = cat_lower in medicine_cats
+            matches_cat = cat_folded in medicine_cats
         elif selected_cat:
-            matches_cat = cat_lower == selected_cat
+            matches_cat = cat_folded == selected_cat
         else:
             matches_cat = True
 
         matches_query = (
             not q
-            or q in item.name.lower()
-            or q in item.lot_number.lower()
-            or q in cat_lower
+            or q in _fold(item.name)
+            or q in _fold(item.lot_number)
+            or q in cat_folded
         )
         if matches_cat and matches_query:
             filtered.append(item)
     return filtered
+
+
+def get_stock_item_by_id(db: Session, item_id: int) -> StockItem | None:
+    """Retrieve a single stock item by primary key."""
+    return db.get(StockItem, item_id)
 
 
 def create_stock_item(
@@ -429,6 +515,7 @@ def create_stock_item(
     quantity: int,
     unit: str,
     min_quantity: int,
+    image_filename: str | None = None,
 ) -> StockItem:
     """Create a new supply item in NGO inventory."""
     qty = max(0, quantity)
@@ -443,6 +530,7 @@ def create_stock_item(
         expiration_date="—",
         min_quantity=min_qty,
         status=status,
+        image_filename=image_filename,
     )
     db.add(item)
     db.commit()
@@ -462,7 +550,7 @@ def register_stock_movement(
         return None
 
     delta = abs(quantity)
-    if movement_type.lower().startswith("saida"):
+    if _fold(movement_type).startswith("saida"):
         item.quantity = max(0, item.quantity - delta)
     else:
         item.quantity += delta
@@ -551,6 +639,45 @@ def list_adoptions(db: Session) -> list[AdoptionTerm]:
     return list(db.scalars(select(AdoptionTerm).order_by(AdoptionTerm.id.desc())).all())
 
 
+def get_adoption_by_id(db: Session, adoption_id: int) -> AdoptionTerm | None:
+    """Retrieve a single adoption record by ID."""
+    return db.get(AdoptionTerm, adoption_id)
+
+
+def update_adoption_record(
+    db: Session,
+    adoption_id: int,
+    adopter_name: str,
+    adopter_cpf: str,
+    adopter_contact: str,
+    adopter_address: str,
+    adoption_date: str,
+) -> AdoptionTerm | None:
+    """Update an existing adoption record."""
+    term = db.get(AdoptionTerm, adoption_id)
+    if term is None:
+        return None
+    term.adopter_name = adopter_name.strip()
+    term.adopter_cpf = adopter_cpf.strip()
+    term.adopter_contact = adopter_contact.strip()
+    term.adopter_address = adopter_address.strip()
+    if adoption_date.strip():
+        term.adoption_date = adoption_date.strip()
+    db.commit()
+    db.refresh(term)
+    return term
+
+
+def delete_adoption_record(db: Session, adoption_id: int) -> bool:
+    """Delete an adoption record by ID."""
+    term = db.get(AdoptionTerm, adoption_id)
+    if term is None:
+        return False
+    db.delete(term)
+    db.commit()
+    return True
+
+
 def create_adoption_record(
     db: Session,
     animal_id: int,
@@ -595,14 +722,14 @@ def list_financial_transactions(
     """List financial transactions with optional type and category filters."""
     stmt = select(FinancialTransaction).order_by(FinancialTransaction.id.desc())
     items = list(db.scalars(stmt).all())
-    t_filter = tx_type.strip().lower()
-    c_filter = category.strip().lower()
+    t_filter = _fold(tx_type)
+    c_filter = _fold(category)
 
     return [
         tx
         for tx in items
-        if (not t_filter or tx.tx_type.lower() == t_filter)
-        and (not c_filter or tx.category.lower() == c_filter)
+        if (not t_filter or _fold(tx.tx_type) == t_filter)
+        and (not c_filter or _fold(tx.category) == c_filter)
     ]
 
 
@@ -701,14 +828,14 @@ def _seed_animals(db: Session) -> None:
     pipoca = Animal(
         name="Pipoca",
         species="Canina",
-        breed="Sem Raca Definida (SRD)",
-        size="Medio (14 kg)",
+        breed="Sem Raça Definida",
+        size="Médio (14 kg)",
         age_approx="2 anos",
-        gender="Femea",
+        gender="Fêmea",
         status="Em Tratamento",
         intake_date="12/08/2026",
         neutered=True,
-        location="Clinica Veterinaria Parceira",
+        location="Clínica Veterinária Parceira",
         microchip="90011800294101",
         rescue_notes=(
             "Resgatada com fratura na pata traseira direita no Bairro Bela Uniao."
@@ -892,10 +1019,10 @@ def _seed_animals(db: Session) -> None:
     luna = Animal(
         name="Luna",
         species="Felina",
-        breed="Frajola (SRD)",
+        breed="Frajola",
         size="Pequeno (3,8 kg)",
         age_approx="1 ano",
-        gender="Femea",
+        gender="Fêmea",
         status="Adotado",
         intake_date="10/05/2026",
         neutered=True,
@@ -931,11 +1058,11 @@ def _seed_animals(db: Session) -> None:
     amora = Animal(
         name="Amora",
         species="Felina",
-        breed="Tigrada (SRD)",
+        breed="Tigrada",
         size="Pequeno (3,4 kg)",
         age_approx="1 ano e 4 meses",
-        gender="Femea",
-        status="Disponivel para Adocao",
+        gender="Fêmea",
+        status="Disponível para Adoção",
         intake_date="02/07/2026",
         neutered=True,
         location="Gatil Central - Modulo A",

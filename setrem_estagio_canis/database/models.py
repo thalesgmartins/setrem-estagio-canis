@@ -65,6 +65,22 @@ class Animal(Base):
         cascade="all, delete-orphan",
         order_by="ClinicalEvent.id.desc()",
     )
+    photos: Mapped[list["AnimalPhoto"]] = relationship(
+        "AnimalPhoto",
+        back_populates="animal",
+        cascade="all, delete-orphan",
+        order_by="AnimalPhoto.is_primary.desc(), AnimalPhoto.id.asc()",
+    )
+
+    @property
+    def primary_photo_id(self) -> int | None:
+        """Return the ID of the primary photo (or first available photo)."""
+        if not self.photos:
+            return None
+        for photo in self.photos:
+            if photo.is_primary:
+                return photo.id
+        return self.photos[0].id
 
     @property
     def foster_history(self) -> list[str]:
@@ -125,6 +141,22 @@ class ClinicalEvent(Base):
     animal: Mapped["Animal"] = relationship("Animal", back_populates="clinical_events")
 
 
+class AnimalPhoto(Base):
+    """Downscaled photo attached to an animal."""
+
+    __tablename__ = "animal_fotos"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    animal_id: Mapped[int] = mapped_column(
+        ForeignKey("animais.id", ondelete="CASCADE"), index=True
+    )
+    filename: Mapped[str] = mapped_column(String(255))
+    is_primary: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+    animal: Mapped["Animal"] = relationship("Animal", back_populates="photos")
+
+
 class StockItem(Base):
     """Pharmaceutical, hygiene, or food supply lot in NGO inventory."""
 
@@ -139,6 +171,7 @@ class StockItem(Base):
     expiration_date: Mapped[str] = mapped_column(String(20))
     min_quantity: Mapped[int] = mapped_column(Integer, default=1)
     status: Mapped[str] = mapped_column(String(40), default="Normal")
+    image_filename: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
 
 class TemporaryHome(Base):
