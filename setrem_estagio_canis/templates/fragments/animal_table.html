@@ -5,11 +5,11 @@
             <thead class="bg-elevated/70 text-ink-secondary text-xs">
                 <tr>
                     <th scope="col" class="px-5 py-3.5 text-left font-semibold">Animal</th>
-                    <th scope="col" class="px-4 py-3.5 text-left font-semibold">Especie / Porte</th>
-                    <th scope="col" class="px-4 py-3.5 text-left font-semibold">Localizacao Atual</th>
-                    <th scope="col" class="px-4 py-3.5 text-left font-semibold">Castracao</th>
+                    <th scope="col" class="px-4 py-3.5 text-left font-semibold">Espécie / Porte</th>
+                    <th scope="col" class="px-4 py-3.5 text-left font-semibold">Localização Atual</th>
+                    <th scope="col" class="px-4 py-3.5 text-left font-semibold">Castração</th>
                     <th scope="col" class="px-4 py-3.5 text-left font-semibold">Status</th>
-                    <th scope="col" class="px-5 py-3.5 text-right font-semibold">Acoes</th>
+                    <th scope="col" class="px-5 py-3.5 text-right font-semibold">Ações</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-subtle/70">
@@ -17,9 +17,16 @@
                 <tr class="hover:bg-elevated/50 transition-colors">
                     <td class="px-5 py-3.5">
                         <a href="/animais/{{ animal.id }}" class="flex items-center gap-3 group">
-                            <div class="w-9 h-9 rounded-xl bg-elevated border border-subtle flex items-center justify-center text-xs font-bold text-ink-primary shrink-0">
+                            {% if animal.primary_photo_id %}
+                            <img
+                                src="/media/animais/{{ animal.primary_photo_id }}"
+                                alt="{{ animal.name }}"
+                                class="w-10 h-10 rounded-xl object-cover border border-subtle shrink-0">
+                            {% else %}
+                            <div class="w-10 h-10 rounded-xl bg-elevated border border-subtle flex items-center justify-center text-xs font-bold text-ink-primary shrink-0">
                                 {{ animal.name[:2]|upper }}
                             </div>
+                            {% endif %}
                             <div class="min-w-0">
                                 <p class="font-semibold text-ink-primary group-hover:text-patas-green transition-colors truncate">{{ animal.name }}</p>
                                 <p class="text-xs text-ink-muted tabular">
@@ -33,7 +40,7 @@
                         <span class="block text-xs text-ink-secondary mt-0.5">{{ animal.breed }} · {{ animal.size }}</span>
                     </td>
                     <td class="px-4 py-3.5 text-xs text-ink-secondary max-w-[260px]">
-                        <span class="block truncate" title="{{ animal.location }}">{{ animal.location }}</span>
+                        <span class="block truncate" title="{{ animal.location }}">{{ animal.location or 'Não informada' }}</span>
                     </td>
                     <td class="px-4 py-3.5 whitespace-nowrap">
                         {% if animal.neutered %}
@@ -51,13 +58,17 @@
                         <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-patas-orange/15 text-patas-orange border border-patas-orange/25">
                             Em Tratamento
                         </span>
-                        {% elif animal.status == 'Lar Temporario' %}
+                        {% elif animal.status in ['Lar Temporário', 'Lar Temporario'] %}
                         <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-patas-blue/15 text-patas-blue border border-patas-blue/25">
-                            Lar Temporario
+                            Lar Temporário
                         </span>
-                        {% elif animal.status in ['Disponivel para Adocao', 'Adotado'] %}
+                        {% elif animal.status in ['Disponível para Adoção', 'Disponivel para Adocao'] %}
                         <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-patas-green/15 text-patas-green border border-patas-green/25">
-                            {{ animal.status }}
+                            Disponível para Adoção
+                        </span>
+                        {% elif animal.status == 'Adotado' %}
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-patas-green/15 text-patas-green border border-patas-green/25">
+                            Adotado
                         </span>
                         {% else %}
                         <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-elevated text-ink-secondary border border-subtle">

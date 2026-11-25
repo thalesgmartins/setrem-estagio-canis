@@ -8,7 +8,7 @@
         <div>
             <h1 class="text-2xl font-bold tracking-tight text-ink-primary">Animais</h1>
             <p class="text-sm text-ink-secondary mt-0.5">
-                Clique em qualquer animal para editar dados, trocar lar temporario ou registrar consultas.
+                Clique em qualquer animal para editar dados, fotos, trocar lar temporário ou registrar consultas.
             </p>
         </div>
         <button
@@ -35,7 +35,7 @@
             <input
                 type="search"
                 name="termo"
-                placeholder="Buscar por nome, raca ou localizacao..."
+                placeholder="Buscar por nome, raça ou localização..."
                 hx-get="/animais/busca"
                 hx-trigger="keyup changed delay:220ms, search"
                 hx-target="#animal-table-container"
@@ -52,8 +52,8 @@
                 hx-include="[name='termo']"
                 class="w-full px-3.5 py-2 text-xs bg-elevated border border-subtle rounded-xl text-ink-primary focus:outline-none focus:border-patas-blue focus:ring-1 focus:ring-patas-blue">
                 <option value="">Todos os status</option>
-                <option value="Disponivel para Adocao">Disponivel para Adocao</option>
-                <option value="Lar Temporario">Lar Temporario</option>
+                <option value="Disponível para Adoção">Disponível para Adoção</option>
+                <option value="Lar Temporário">Lar Temporário</option>
                 <option value="Acolhido">Acolhido</option>
                 <option value="Em Tratamento">Em Tratamento</option>
                 <option value="Adotado">Adotado</option>

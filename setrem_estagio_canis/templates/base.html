@@ -42,12 +42,12 @@
                 </button>
             </div>
 
-            <!-- Main Navigation (Simplified & Direct) -->
-            <nav class="flex-1 px-3 py-5 space-y-1 overflow-y-auto" aria-label="Navegacao principal">
+            <!-- Main Navigation -->
+            <nav class="flex-1 px-3 py-5 space-y-1 overflow-y-auto" aria-label="Navegação principal">
                 <a href="/"
                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors {% if active_page == 'dashboard' %}bg-patas-green/15 text-patas-green{% else %}text-ink-secondary hover:text-ink-primary hover:bg-elevated{% endif %}">
                     <i class="mdi mdi-view-dashboard-outline text-lg"></i>
-                    <span>Visao Geral</span>
+                    <span>Visão Geral</span>
                 </a>
 
                 <a href="/animais"
@@ -59,7 +59,7 @@
                 <a href="/lares"
                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors {% if active_page == 'lares' %}bg-patas-green/15 text-patas-green{% else %}text-ink-secondary hover:text-ink-primary hover:bg-elevated{% endif %}">
                     <i class="mdi mdi-home-heart text-lg"></i>
-                    <span>Lares e Adocoes</span>
+                    <span>Lares e Adoções</span>
                 </a>
 
                 <a href="/estoque"
@@ -80,14 +80,14 @@
                    target="_blank"
                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-ink-secondary hover:text-ink-primary hover:bg-elevated transition-colors">
                     <i class="mdi mdi-open-in-new text-lg"></i>
-                    <span>Catalogo Publico</span>
+                    <span>Catálogo Público</span>
                 </a>
 
                 {% if current_user and current_user.role == 'admin' %}
                 <a href="/admin/usuarios"
                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors {% if active_page == 'usuarios' %}bg-patas-green/15 text-patas-green{% else %}text-ink-secondary hover:text-ink-primary hover:bg-elevated{% endif %}">
                     <i class="mdi mdi-account-group-outline text-lg"></i>
-                    <span>Usuarios</span>
+                    <span>Usuários</span>
                 </a>
                 {% endif %}
             </nav>
@@ -97,7 +97,7 @@
                 <a href="/configuracoes"
                    class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium transition-colors {% if active_page == 'configuracoes' %}bg-patas-green/15 text-patas-green{% else %}text-ink-secondary hover:text-ink-primary hover:bg-elevated{% endif %}">
                     <i class="mdi mdi-cog-outline text-base"></i>
-                    <span>Configuracoes</span>
+                    <span>Configurações</span>
                 </a>
                 <a href="/auth/logout"
                    class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-ink-secondary hover:text-red-400 hover:bg-red-500/10 transition-colors">
@@ -121,7 +121,7 @@
                         <i class="mdi mdi-menu text-xl"></i>
                     </button>
                     <p class="hidden sm:block text-sm font-semibold text-ink-primary truncate">
-                        {{ page_title | default('Visao Geral') }}
+                        {{ page_title | default('Visão Geral') }}
                     </p>
                 </div>
 
@@ -147,10 +147,10 @@
                 </div>
 
                 <!-- Volunteer Profile Link -->
-                <a href="/configuracoes" title="Configuracoes da conta" class="flex items-center gap-3 shrink-0 rounded-full p-1 sm:pr-2 hover:bg-elevated transition-colors">
+                <a href="/configuracoes" title="Configurações da conta" class="flex items-center gap-3 shrink-0 rounded-full p-1 sm:pr-2 hover:bg-elevated transition-colors">
                     <div class="hidden md:block text-right leading-tight">
-                        <p class="text-xs font-semibold text-ink-primary">{{ current_user.nome if current_user else 'Voluntario' }}</p>
-                        <p class="text-[11px] text-ink-muted">{{ 'Administrador' if current_user and current_user.role == 'admin' else 'Voluntario' }}</p>
+                        <p class="text-xs font-semibold text-ink-primary">{{ current_user.nome if current_user else 'Voluntário' }}</p>
+                        <p class="text-[11px] text-ink-muted">{{ 'Administrador' if current_user and current_user.role == 'admin' else 'Voluntário' }}</p>
                     </div>
                     <div class="w-9 h-9 rounded-full bg-elevated border border-subtle flex items-center justify-center text-xs font-semibold text-ink-primary overflow-hidden">
                         {% if tem_avatar %}

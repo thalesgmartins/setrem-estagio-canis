@@ -6,16 +6,17 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold tracking-tight text-ink-primary">Financeiro e Prestacao de Contas</h1>
+            <h1 class="text-2xl font-bold tracking-tight text-ink-primary">Financeiro e Prestação de Contas</h1>
             <p class="text-sm text-ink-secondary mt-0.5">
-                Controle de doacoes, campanhas, despesas com clinicas parceiras e insumos da ONG.
+                Controle de doações, campanhas, despesas com clínicas parceiras e insumos da ONG.
             </p>
         </div>
         <div class="flex items-center gap-2.5">
             <a
                 href="/financeiro/exportar-csv"
-                class="px-3.5 py-2.5 rounded-xl bg-elevated hover:bg-subtle border border-subtle text-xs font-medium text-ink-primary transition-colors">
-                Exportar CSV
+                class="px-3.5 py-2.5 rounded-xl bg-elevated hover:bg-subtle border border-subtle text-xs font-medium text-ink-primary transition-colors inline-flex items-center gap-1.5">
+                <i class="mdi mdi-download-outline text-base"></i>
+                <span>Exportar CSV</span>
             </a>
             <button
                 type="button"
@@ -23,10 +24,8 @@
                 hx-target="#modal-container"
                 hx-swap="innerHTML"
                 class="px-4 py-2.5 rounded-xl bg-patas-green hover:bg-patas-green-hover text-[#061c14] text-xs font-semibold transition-colors inline-flex items-center gap-1.5">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                </svg>
-                <span>Novo Lancamento</span>
+                <i class="mdi mdi-plus text-base"></i>
+                <span>Novo Lançamento</span>
             </button>
         </div>
     </div>
@@ -42,19 +41,19 @@
         <div class="bg-surface border border-subtle rounded-xl p-5 space-y-2">
             <span class="text-xs font-medium text-ink-secondary">Total de Entradas</span>
             <p class="text-2xl font-bold font-mono tabular text-patas-green">{{ summary.total_income_brl }}</p>
-            <p class="text-xs text-ink-muted">Doacoes PIX, rifas e padrinhos</p>
+            <p class="text-xs text-ink-muted">Doações PIX, rifas e padrinhos</p>
         </div>
 
         <div class="bg-surface border border-subtle rounded-xl p-5 space-y-2">
-            <span class="text-xs font-medium text-ink-secondary">Saidas Pagas</span>
+            <span class="text-xs font-medium text-ink-secondary">Saídas Pagas</span>
             <p class="text-2xl font-bold font-mono tabular text-ink-primary">{{ summary.total_expense_brl }}</p>
-            <p class="text-xs text-ink-muted">Racao, medicamentos e clinicas</p>
+            <p class="text-xs text-ink-muted">Ração, suprimentos e clínicas</p>
         </div>
 
         <div class="bg-surface border border-subtle rounded-xl p-5 space-y-2">
             <span class="text-xs font-medium text-ink-secondary">Contas Pendentes</span>
             <p class="text-2xl font-bold font-mono tabular text-patas-orange">{{ summary.pending_expense_brl }}</p>
-            <p class="text-xs text-patas-orange">Faturas em aberto em clinicas</p>
+            <p class="text-xs text-patas-orange">Faturas em aberto em clínicas</p>
         </div>
     </section>
 
@@ -69,7 +68,7 @@
             class="px-3.5 py-2 text-xs bg-elevated border border-subtle rounded-xl text-ink-primary focus:outline-none focus:border-patas-blue focus:ring-1 focus:ring-patas-blue">
             <option value="">Todos os tipos</option>
             <option value="Entrada">Apenas Entradas</option>
-            <option value="Saida">Apenas Saidas</option>
+            <option value="Saida">Apenas Saídas</option>
         </select>
 
         <select
@@ -80,12 +79,12 @@
             hx-include="[name='tipo']"
             class="px-3.5 py-2 text-xs bg-elevated border border-subtle rounded-xl text-ink-primary focus:outline-none focus:border-patas-blue focus:ring-1 focus:ring-patas-blue">
             <option value="">Todas as categorias</option>
-            <option value="Doacao PIX">Doacao PIX</option>
-            <option value="Rifa / Brecho">Rifa / Brecho</option>
-            <option value="Clinica Veterinaria">Clinica Veterinaria</option>
-            <option value="Medicamentos">Medicamentos</option>
-            <option value="Racao">Racao</option>
-            <option value="Castracao">Castracao</option>
+            <option value="Doação PIX">Doação PIX</option>
+            <option value="Rifa / Brechó">Rifa / Brechó</option>
+            <option value="Clínica Veterinária">Clínica Veterinária</option>
+            <option value="Ração">Ração</option>
+            <option value="Castração">Castração</option>
+            <option value="Estrutura">Estrutura</option>
         </select>
     </div>
 

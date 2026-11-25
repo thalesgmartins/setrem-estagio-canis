@@ -4,9 +4,9 @@
 <div class="space-y-6">
 
     <div>
-        <h1 class="text-2xl font-bold tracking-tight text-ink-primary">Usuarios e Permissoes</h1>
+        <h1 class="text-2xl font-bold tracking-tight text-ink-primary">Usuários e Permissões</h1>
         <p class="text-sm text-ink-secondary mt-0.5">
-            Aprove contas Google pendentes, pre-cadastre voluntarios e controle quem pode editar dados da ONG.
+            Aprove contas Google pendentes, pré-cadastre voluntários e controle quem pode editar dados da ONG.
         </p>
     </div>
 
@@ -16,7 +16,7 @@
     </div>
     {% endif %}
     {% if msg_erro %}
-    <div class="p-3.5 rounded-xl bg-red-500/10 border border-red-500/25 text-xs text-red-300 font-medium">
+    <div class="p-3.5 rounded-xl bg-red-500/10 border border-red-500/25 text-xs text-red-400 font-medium">
         {{ msg_erro }}
     </div>
     {% endif %}
@@ -24,9 +24,9 @@
     <!-- Pre-register Authorized Email -->
     <section class="bg-surface border border-subtle rounded-xl p-5 space-y-4">
         <div>
-            <h2 class="text-sm font-semibold text-ink-primary">Autorizar Novo Voluntario</h2>
+            <h2 class="text-sm font-semibold text-ink-primary">Autorizar Novo Voluntário</h2>
             <p class="text-xs text-ink-secondary mt-0.5">
-                Pre-cadastre o e-mail Google da pessoa para que ela ja entre liberada no primeiro login.
+                Pré-cadastre o e-mail Google da pessoa para que ela já entre liberada no primeiro login.
             </p>
         </div>
 
@@ -46,7 +46,7 @@
             <select
                 name="role"
                 class="px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl text-ink-primary focus:outline-none focus:border-patas-blue">
-                <option value="voluntario">Voluntario (Editor)</option>
+                <option value="voluntario">Voluntário (Editor)</option>
                 <option value="admin">Administrador</option>
             </select>
             <button
@@ -63,7 +63,7 @@
             <table class="min-w-full divide-y divide-subtle text-sm">
                 <thead class="bg-elevated/70 text-ink-secondary text-xs">
                     <tr>
-                        <th class="px-5 py-3.5 text-left font-semibold">Usuario</th>
+                        <th class="px-5 py-3.5 text-left font-semibold">Usuário</th>
                         <th class="px-4 py-3.5 text-left font-semibold">Papel</th>
                         <th class="px-4 py-3.5 text-left font-semibold">Status</th>
                         <th class="px-5 py-3.5 text-right font-semibold">Gerenciar Acesso</th>
@@ -73,8 +73,21 @@
                     {% for u in users %}
                     <tr class="hover:bg-elevated/50 transition-colors">
                         <td class="px-5 py-3.5">
-                            <p class="text-xs font-semibold text-ink-primary">{{ u.nome }}</p>
-                            <p class="text-[11px] font-mono text-ink-secondary">{{ u.email }}</p>
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-full bg-elevated border border-subtle flex items-center justify-center text-xs font-semibold text-ink-primary overflow-hidden shrink-0">
+                                    {% if custom_avatars and custom_avatars.get(u.id) %}
+                                    <img src="/auth/avatar/{{ u.id }}" alt="{{ u.nome }}" class="w-full h-full object-cover">
+                                    {% elif u.avatar_url %}
+                                    <img src="{{ u.avatar_url }}" alt="{{ u.nome }}" class="w-full h-full object-cover">
+                                    {% else %}
+                                    {{ u.nome[:2]|upper }}
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <p class="text-xs font-semibold text-ink-primary">{{ u.nome }}</p>
+                                    <p class="text-[11px] font-mono text-ink-secondary">{{ u.email }}</p>
+                                </div>
+                            </div>
                         </td>
                         <td class="px-4 py-3.5 whitespace-nowrap">
                             {% if u.role == 'admin' %}
@@ -83,11 +96,11 @@
                             </span>
                             {% elif u.role == 'voluntario' %}
                             <span class="px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-patas-green/15 text-patas-green border border-patas-green/25">
-                                Voluntario
+                                Voluntário
                             </span>
                             {% else %}
                             <span class="px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-patas-orange/15 text-patas-orange border border-patas-orange/25">
-                                Pendente de Aprovacao
+                                Pendente de Aprovação
                             </span>
                             {% endif %}
                         </td>
@@ -103,13 +116,13 @@
                             <form action="/admin/usuarios/{{ u.id }}/papel" method="post" class="inline">
                                 <input type="hidden" name="role" value="voluntario">
                                 <button type="submit" class="px-3 py-1.5 rounded-lg bg-patas-green hover:bg-patas-green-hover text-[#061c14] text-xs font-semibold">
-                                    Aprovar Voluntario
+                                    Aprovar Voluntário
                                 </button>
                             </form>
                             {% else %}
                             <form action="/admin/usuarios/{{ u.id }}/papel" method="post" class="inline-flex items-center gap-1.5">
-                                <select name="role" class="px-2 py-1 text-xs bg-elevated border border-subtle rounded-lg text-ink-primary">
-                                    <option value="voluntario" {% if u.role == 'voluntario' %}selected{% endif %}>Voluntario</option>
+                                <select name="role" class="px-2.5 py-1 text-xs bg-elevated border border-subtle rounded-lg text-ink-primary">
+                                    <option value="voluntario" {% if u.role == 'voluntario' %}selected{% endif %}>Voluntário</option>
                                     <option value="admin" {% if u.role == 'admin' %}selected{% endif %}>Admin</option>
                                 </select>
                                 <button type="submit" class="px-2.5 py-1 rounded-lg bg-elevated hover:bg-subtle border border-subtle text-xs text-ink-primary">

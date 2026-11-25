@@ -6,9 +6,9 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold tracking-tight text-ink-primary">Lares Temporarios e Adocoes</h1>
+            <h1 class="text-2xl font-bold tracking-tight text-ink-primary">Lares Temporários e Adoções</h1>
             <p class="text-sm text-ink-secondary mt-0.5">
-                Cadastre voluntarios acolhedores, acompanhe vagas e registre adocoes concluidas.
+                Cadastre voluntários acolhedores, acompanhe vagas e registre adoções concluídas.
             </p>
         </div>
         <div class="flex items-center gap-2.5 flex-wrap">
@@ -19,7 +19,7 @@
                 hx-swap="innerHTML"
                 class="px-3.5 py-2.5 rounded-xl bg-elevated hover:bg-subtle border border-subtle text-xs font-medium text-ink-primary inline-flex items-center gap-1.5">
                 <i class="mdi mdi-heart-plus-outline text-base"></i>
-                <span>Registrar Adocao</span>
+                <span>Registrar Adoção</span>
             </button>
             <button
                 type="button"
@@ -28,7 +28,7 @@
                 hx-swap="innerHTML"
                 class="px-4 py-2.5 rounded-xl bg-patas-green hover:bg-patas-green-hover text-[#061c14] text-xs font-semibold inline-flex items-center gap-1.5">
                 <i class="mdi mdi-home-plus-outline text-base"></i>
-                <span>Novo Lar Temporario</span>
+                <span>Novo Lar Temporário</span>
             </button>
         </div>
     </div>
@@ -44,8 +44,8 @@
         <!-- Temporary Foster Homes -->
         <section class="bg-surface border border-subtle rounded-xl flex flex-col">
             <div class="px-5 py-4 border-b border-subtle flex items-center justify-between">
-                <h2 class="text-sm font-semibold text-ink-primary">Lares Temporarios ({{ foster_homes|length }})</h2>
-                <span class="text-xs text-ink-muted">Voluntarios cadastrados</span>
+                <h2 class="text-sm font-semibold text-ink-primary">Lares Temporários ({{ foster_homes|length }})</h2>
+                <span class="text-xs text-ink-muted">Voluntários cadastrados</span>
             </div>
 
             <div class="p-5 space-y-3">
@@ -64,6 +64,16 @@
                         <div class="flex items-center gap-1.5 shrink-0">
                             <button
                                 type="button"
+                                hx-get="/modais/nova-adocao?home_id={{ home.id }}"
+                                hx-target="#modal-container"
+                                hx-swap="innerHTML"
+                                title="Registrar adoção com este voluntário"
+                                class="px-2.5 py-1.5 rounded-lg bg-patas-green/15 hover:bg-patas-green/25 border border-patas-green/25 text-[11px] font-semibold text-patas-green inline-flex items-center gap-1">
+                                <i class="mdi mdi-heart-outline text-sm"></i>
+                                <span>Adotar</span>
+                            </button>
+                            <button
+                                type="button"
                                 hx-get="/modais/editar-lar/{{ home.id }}"
                                 hx-target="#modal-container"
                                 hx-swap="innerHTML"
@@ -71,7 +81,7 @@
                                 class="p-1.5 rounded-lg bg-surface hover:bg-subtle border border-subtle text-ink-secondary hover:text-ink-primary">
                                 <i class="mdi mdi-pencil-outline text-sm"></i>
                             </button>
-                            <form action="/lares/{{ home.id }}/excluir" method="post" onsubmit="return confirm('Remover este lar temporario?');" class="inline">
+                            <form action="/lares/{{ home.id }}/excluir" method="post" onsubmit="return confirm('Remover este lar temporário?');" class="inline">
                                 <button type="submit" title="Excluir lar" class="p-1.5 rounded-lg bg-surface hover:bg-red-500/15 border border-subtle text-ink-secondary hover:text-red-400">
                                     <i class="mdi mdi-trash-can-outline text-sm"></i>
                                 </button>
@@ -79,17 +89,35 @@
                         </div>
                     </div>
 
+                    {% if hosted %}
+                    <div class="space-y-1.5">
+                        {% for animal in hosted %}
+                        <div class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg bg-surface border border-subtle text-xs">
+                            <a href="/animais/{{ animal.id }}" class="font-medium text-ink-primary hover:text-patas-green truncate">
+                                <i class="mdi mdi-paw text-patas-blue mr-1"></i>{{ animal.name }}
+                            </a>
+                            <button
+                                type="button"
+                                hx-get="/modais/nova-adocao?home_id={{ home.id }}&animal_id={{ animal.id }}"
+                                hx-target="#modal-container"
+                                hx-swap="innerHTML"
+                                class="text-[11px] font-semibold text-patas-green hover:underline shrink-0">
+                                Efetivar Adoção
+                            </button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
                     <div class="flex items-center justify-between text-xs">
-                        {% if hosted %}
-                        <span class="px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-patas-blue/15 text-patas-blue border border-patas-blue/25">
-                            Acolhendo: {{ hosted|join(', ') }}
-                        </span>
-                        {% else %}
                         <span class="px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-patas-green/15 text-patas-green border border-patas-green/25">
                             Vaga livre
                         </span>
-                        {% endif %}
-                        <span class="text-[11px] text-ink-muted tabular">{{ occupied }} / {{ home.capacity }} vaga(s)</span>
+                    </div>
+                    {% endif %}
+
+                    <div class="flex items-center justify-between text-[11px] text-ink-muted tabular">
+                        <span>Ocupação</span>
+                        <span>{{ occupied }} / {{ home.capacity }} vaga(s)</span>
                     </div>
 
                     <div class="h-1.5 w-full rounded-full bg-surface overflow-hidden">
@@ -97,7 +125,7 @@
                     </div>
                 </div>
                 {% else %}
-                <p class="text-xs text-ink-muted text-center py-6">Nenhum lar temporario cadastrado ainda.</p>
+                <p class="text-xs text-ink-muted text-center py-6">Nenhum lar temporário cadastrado ainda.</p>
                 {% endfor %}
             </div>
         </section>
@@ -105,8 +133,8 @@
         <!-- Completed Adoptions -->
         <section class="bg-surface border border-subtle rounded-xl flex flex-col">
             <div class="px-5 py-4 border-b border-subtle flex items-center justify-between">
-                <h2 class="text-sm font-semibold text-ink-primary">Adocoes Concluidas ({{ adoptions|length }})</h2>
-                <span class="text-xs text-ink-muted">Historico</span>
+                <h2 class="text-sm font-semibold text-ink-primary">Adoções Concluídas ({{ adoptions|length }})</h2>
+                <span class="text-xs text-ink-muted">Histórico</span>
             </div>
 
             <div class="p-5 space-y-3">
@@ -122,17 +150,31 @@
                                 Adotante: {{ adocao.adopter_name }}
                             </p>
                         </div>
-                        <span class="px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-patas-green/15 text-patas-green border border-patas-green/25 font-mono tabular">
-                            {{ adocao.adoption_date }}
-                        </span>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <span class="px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-patas-green/15 text-patas-green border border-patas-green/25 font-mono tabular">
+                                {{ adocao.adoption_date }}
+                            </span>
+                            <button
+                                type="button"
+                                hx-get="/modais/editar-adocao/{{ adocao.id }}"
+                                hx-target="#modal-container"
+                                hx-swap="innerHTML"
+                                title="Editar adoção"
+                                class="p-1.5 rounded-lg bg-surface hover:bg-subtle border border-subtle text-ink-secondary hover:text-ink-primary">
+                                <i class="mdi mdi-pencil-outline text-sm"></i>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="pt-2 border-t border-subtle/80 text-xs text-ink-muted font-mono tabular">
                         CPF: {{ adocao.adopter_cpf }} · {{ adocao.adopter_contact }}
                     </div>
+                    {% if adocao.adopter_address %}
+                    <p class="text-[11px] text-ink-muted">{{ adocao.adopter_address }}</p>
+                    {% endif %}
                 </div>
                 {% else %}
-                <p class="text-xs text-ink-muted text-center py-6">Nenhuma adocao registrada ainda.</p>
+                <p class="text-xs text-ink-muted text-center py-6">Nenhuma adoção registrada ainda.</p>
                 {% endfor %}
             </div>
         </section>

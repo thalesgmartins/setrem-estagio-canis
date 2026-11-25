@@ -1,55 +1,76 @@
 {% if animals %}
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
     {% for animal in animals %}
-    <article class="bg-surface border border-subtle rounded-2xl overflow-hidden flex flex-col justify-between hover:border-[#3e3e3e] transition-colors">
-        <div class="p-6 space-y-4">
-            <div class="flex items-start justify-between gap-3">
-                <div class="flex items-center gap-3.5">
-                    <div class="w-14 h-14 rounded-2xl bg-elevated border border-subtle flex items-center justify-center text-lg font-bold text-ink-primary shrink-0">
-                        {{ animal.name[:2]|upper }}
+    <article class="bg-surface border border-subtle rounded-2xl overflow-hidden flex flex-col justify-between hover:border-patas-green/50 transition-colors">
+        <div
+            hx-get="/adocao/{{ animal.id }}"
+            hx-target="#modal-container"
+            hx-swap="innerHTML"
+            class="cursor-pointer group flex-1 flex flex-col">
+            {% if animal.primary_photo_id %}
+            <div class="relative h-52 bg-elevated overflow-hidden border-b border-subtle">
+                <img
+                    src="/media/animais/{{ animal.primary_photo_id }}"
+                    alt="{{ animal.name }}"
+                    class="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300">
+                {% if animal.photos|length > 1 %}
+                <span class="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-black/70 text-white inline-flex items-center gap-1">
+                    <i class="mdi mdi-image-multiple-outline text-xs"></i>
+                    <span>{{ animal.photos|length }} fotos</span>
+                </span>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <div class="p-6 space-y-4 flex-1">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="flex items-center gap-3.5">
+                        {% if not animal.primary_photo_id %}
+                        <div class="w-12 h-12 rounded-2xl bg-elevated border border-subtle flex items-center justify-center text-base font-bold text-ink-primary shrink-0">
+                            {{ animal.name[:2]|upper }}
+                        </div>
+                        {% endif %}
+                        <div>
+                            <h2 class="text-lg font-bold text-ink-primary group-hover:text-patas-green transition-colors tracking-tight">{{ animal.name }}</h2>
+                            <p class="text-xs text-ink-secondary">{{ animal.species }} · {{ animal.breed }}</p>
+                        </div>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-patas-green/15 text-patas-green border border-patas-green/25 shrink-0">
+                        Disponível
+                    </span>
+                </div>
+
+                <p class="text-xs text-ink-secondary leading-relaxed line-clamp-3">
+                    {{ animal.temperament or animal.rescue_notes }}
+                </p>
+
+                <div class="grid grid-cols-2 gap-2.5 p-3.5 rounded-xl bg-elevated/70 border border-subtle text-xs">
+                    <div>
+                        <span class="block text-[11px] text-ink-muted">Idade / Sexo</span>
+                        <span class="font-medium text-ink-primary">{{ animal.age_approx }} · {{ animal.gender }}</span>
                     </div>
                     <div>
-                        <h2 class="text-lg font-bold text-ink-primary tracking-tight">{{ animal.name }}</h2>
-                        <p class="text-xs text-ink-secondary">{{ animal.species }} · {{ animal.breed }}</p>
+                        <span class="block text-[11px] text-ink-muted">Porte</span>
+                        <span class="font-medium text-ink-primary">{{ animal.size }}</span>
                     </div>
-                </div>
-                <span class="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-patas-green/15 text-patas-green border border-patas-green/25 shrink-0">
-                    Disponivel
-                </span>
-            </div>
-
-            <p class="text-xs text-ink-secondary leading-relaxed">
-                {{ animal.temperament or animal.rescue_notes }}
-            </p>
-
-            <div class="grid grid-cols-2 gap-2.5 p-3.5 rounded-xl bg-elevated/70 border border-subtle text-xs">
-                <div>
-                    <span class="block text-[11px] text-ink-muted">Idade / Sexo</span>
-                    <span class="font-medium text-ink-primary">{{ animal.age_approx }} · {{ animal.gender }}</span>
-                </div>
-                <div>
-                    <span class="block text-[11px] text-ink-muted">Porte</span>
-                    <span class="font-medium text-ink-primary">{{ animal.size }}</span>
-                </div>
-                <div>
-                    <span class="block text-[11px] text-ink-muted">Castracao</span>
-                    <span class="font-medium {% if animal.neutered %}text-patas-green{% else %}text-patas-orange{% endif %}">
-                        {% if animal.neutered %}Castrado(a){% else %}A combinar{% endif %}
-                    </span>
-                </div>
-                <div>
-                    <span class="block text-[11px] text-ink-muted">Vacinas</span>
-                    <span class="font-medium text-patas-green">
-                        {{ animal.vaccines|length }} dose(s) registrada(s)
-                    </span>
+                    <div>
+                        <span class="block text-[11px] text-ink-muted">Castração</span>
+                        <span class="font-medium {% if animal.neutered %}text-patas-green{% else %}text-patas-orange{% endif %}">
+                            {% if animal.neutered %}Castrado(a){% else %}A combinar{% endif %}
+                        </span>
+                    </div>
+                    <div>
+                        <span class="block text-[11px] text-ink-muted">Detalhes</span>
+                        <span class="font-medium text-patas-blue group-hover:underline">Ver mais</span>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="px-6 py-4 border-t border-subtle bg-elevated/30 flex items-center justify-between gap-3">
-            <span class="text-[11px] text-ink-muted">Adocao responsavel com termo</span>
+            <span class="text-[11px] text-ink-muted">Adoção responsável com termo</span>
             <a
-                href="https://wa.me/{{ ong_whatsapp }}?text=Ola!%20Tenho%20interesse%20em%20adotar%20{{ animal.name }}%20pelo%20catalogo%20da%20ONG%20Patas%20e%20Pelos."
+                href="https://wa.me/{{ ong_whatsapp }}?text=Ol%C3%A1!%20Tenho%20interesse%20em%20adotar%20{{ animal.name }}%20pelo%20cat%C3%A1logo%20da%20ONG%20Patas%20e%20Pelos."
                 target="_blank"
                 rel="noopener noreferrer"
                 class="px-4 py-2 rounded-xl bg-patas-green hover:bg-patas-green-hover text-[#061c14] text-xs font-semibold transition-colors">
@@ -61,7 +82,7 @@
 </div>
 {% else %}
 <div class="bg-surface border border-subtle rounded-2xl p-12 text-center space-y-2">
-    <p class="text-sm font-semibold text-ink-primary">Nenhum animal disponivel para este filtro no momento.</p>
+    <p class="text-sm font-semibold text-ink-primary">Nenhum animal disponível para este filtro no momento.</p>
     <p class="text-xs text-ink-secondary">Tente remover os filtros ou volte em breve para conhecer novos resgatados.</p>
 </div>
 {% endif %}

@@ -8,7 +8,7 @@
         <div>
             <h1 class="text-2xl font-bold tracking-tight text-ink-primary">Estoque de Suprimentos</h1>
             <p class="text-sm text-ink-secondary mt-0.5">
-                Controle de racao, higiene, areia e acessorios da ONG.
+                Controle de ração, higiene, areia e acessórios da ONG.
             </p>
         </div>
         <div class="flex items-center gap-2.5 flex-wrap">
@@ -19,7 +19,7 @@
                 hx-swap="innerHTML"
                 class="px-3.5 py-2.5 rounded-xl bg-elevated hover:bg-subtle border border-subtle text-xs font-medium text-ink-primary inline-flex items-center gap-1.5">
                 <i class="mdi mdi-swap-vertical text-base"></i>
-                <span>Entrada / Saida</span>
+                <span>Entrada / Saída</span>
             </button>
             <button
                 type="button"
@@ -46,7 +46,7 @@
             <input
                 type="search"
                 name="termo"
-                placeholder="Buscar racao, higiene ou acessorio..."
+                placeholder="Buscar ração, higiene ou acessório..."
                 hx-get="/estoque/busca"
                 hx-trigger="keyup changed delay:220ms, search"
                 hx-target="#stock-table-container"
@@ -57,7 +57,7 @@
         <input type="hidden" id="stock-category-input" name="categoria" value="">
 
         <div class="flex items-center gap-2 flex-wrap" id="stock-category-pills">
-            {% for label, value in [('Todos', ''), ('Racao', 'Racao'), ('Higiene', 'Higiene'), ('Acessorios', 'Acessorios')] %}
+            {% for label, value in [('Todos', ''), ('Ração', 'Ração'), ('Higiene', 'Higiene'), ('Acessórios', 'Acessórios')] %}
             <button
                 type="button"
                 onclick="selectStockCategory(this, '{{ value }}')"

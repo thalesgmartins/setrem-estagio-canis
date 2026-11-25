@@ -4,8 +4,8 @@
     <div class="bg-surface border border-subtle rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl">
         <div class="px-6 py-4 border-b border-subtle flex items-center justify-between">
             <div>
-                <h3 class="text-base font-bold text-ink-primary">Entrada / Saida de Estoque</h3>
-                <p class="text-xs text-ink-secondary mt-0.5">Registre doacoes recebidas ou baixas de consumo</p>
+                <h3 class="text-base font-bold text-ink-primary">Entrada / Saída de Estoque</h3>
+                <p class="text-xs text-ink-secondary mt-0.5">Registre doações recebidas ou baixas de consumo</p>
             </div>
             <button type="button" onclick="closeModal()" aria-label="Fechar" class="p-1.5 rounded-lg text-ink-secondary hover:text-ink-primary hover:bg-elevated">
                 <i class="mdi mdi-close text-lg"></i>
@@ -19,15 +19,15 @@
                     <label class="block font-medium text-ink-secondary">Item de estoque</label>
                     <select name="item_id" class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl text-ink-primary focus:outline-none focus:border-patas-blue">
                         {% for item in stock_items %}
-                        <option value="{{ item.id }}">{{ item.name }} (Saldo: {{ item.quantity }} {{ item.unit }})</option>
+                        <option value="{{ item.id }}" {% if selected_item_id == item.id %}selected{% endif %}>{{ item.name }} (Saldo: {{ item.quantity }} {{ item.unit }})</option>
                         {% endfor %}
                     </select>
                 </div>
                 <div class="space-y-1.5">
-                    <label class="block font-medium text-ink-secondary">Tipo de movimentacao</label>
+                    <label class="block font-medium text-ink-secondary">Tipo de movimentação</label>
                     <select name="movement_type" class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl text-ink-primary focus:outline-none focus:border-patas-blue">
-                        <option value="Entrada">Entrada (Compra / Doacao)</option>
-                        <option value="Saida">Saida (Consumo / Repasse)</option>
+                        <option value="Entrada">Entrada (Compra / Doação)</option>
+                        <option value="Saída">Saída (Consumo / Repasse)</option>
                     </select>
                 </div>
                 <div class="space-y-1.5">
@@ -47,7 +47,7 @@
         </form>
         {% else %}
         <div class="p-6 text-center space-y-3 text-xs">
-            <p class="text-ink-secondary">Nenhum item cadastrado no estoque ainda. Cadastre um item primeiro pelo botao "Novo Item".</p>
+            <p class="text-ink-secondary">Nenhum item cadastrado no estoque ainda. Cadastre um item primeiro pelo botão "Novo Item".</p>
             <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl bg-elevated hover:bg-subtle border border-subtle font-medium text-ink-primary">
                 Fechar
             </button>

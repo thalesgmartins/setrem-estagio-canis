@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adocao — Patas e Pelos</title>
+    <title>Adoção — Patas e Pelos</title>
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <link rel="stylesheet" href="/static/css/tailwind.min.css">
     <link rel="stylesheet" href="/static/css/materialdesignicons.min.css">
@@ -11,14 +11,14 @@
 </head>
 <body class="bg-canvas text-ink-primary min-h-screen font-sans antialiased flex flex-col">
 
-    <!-- Clean Public Top Bar (No Volunteer Link) -->
+    <!-- Clean Public Top Bar -->
     <header class="bg-surface/90 backdrop-blur-md border-b border-subtle sticky top-0 z-30">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
             <a href="/adocao" class="flex items-center gap-3">
                 <img src="/static/laika-logo.svg" alt="Patas e Pelos" class="w-8 h-8 object-contain">
                 <div class="leading-tight">
                     <span class="block text-sm font-bold text-ink-primary">Patas e Pelos</span>
-                    <span class="block text-[11px] text-ink-secondary">Adocao Responsavel</span>
+                    <span class="block text-[11px] text-ink-secondary">Adoção Responsável</span>
                 </div>
             </a>
         </div>
@@ -31,13 +31,13 @@
         <section class="space-y-3 max-w-2xl">
             <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-patas-green/15 text-patas-green border border-patas-green/25">
                 <i class="mdi mdi-paw text-sm"></i>
-                <span>Catalogo Publico de Adocao</span>
+                <span>Catálogo Público de Adoção</span>
             </span>
             <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-ink-primary">
-                Encontre seu proximo companheiro
+                Encontre seu próximo companheiro
             </h1>
             <p class="text-sm text-ink-secondary leading-relaxed">
-                Todos os animais abaixo estao prontos para ganhar um lar responsavel. Clique em "Quero Adotar" para falar com a equipe pelo WhatsApp.
+                Todos os animais abaixo estão prontos para ganhar um lar responsável. Clique em um card para ver mais fotos e detalhes, ou em "Quero Adotar" para falar com a equipe pelo WhatsApp.
             </p>
         </section>
 
@@ -51,8 +51,8 @@
                     hx-target="#catalogo-grid"
                     hx-include="[name='porte']"
                     class="px-3.5 py-2.5 text-xs bg-elevated border border-subtle rounded-xl text-ink-primary focus:outline-none focus:border-patas-blue focus:ring-1 focus:ring-patas-blue">
-                    <option value="">Todas as especies (Caes e Gatos)</option>
-                    <option value="Canina">Caes</option>
+                    <option value="">Todas as espécies (Cães e Gatos)</option>
+                    <option value="Canina">Cães</option>
                     <option value="Felina">Gatos</option>
                 </select>
 
@@ -65,7 +65,7 @@
                     class="px-3.5 py-2.5 text-xs bg-elevated border border-subtle rounded-xl text-ink-primary focus:outline-none focus:border-patas-blue focus:ring-1 focus:ring-patas-blue">
                     <option value="">Todos os portes</option>
                     <option value="Pequeno">Porte Pequeno</option>
-                    <option value="Medio">Porte Medio</option>
+                    <option value="Médio">Porte Médio</option>
                     <option value="Grande">Porte Grande</option>
                 </select>
             </div>
@@ -77,6 +77,19 @@
         </section>
 
     </main>
+
+    <!-- Public Detail Modal Container -->
+    <div id="modal-container"></div>
+
+    <script>
+        function closeModal() {
+            const container = document.getElementById('modal-container');
+            if (container) container.innerHTML = '';
+        }
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+    </script>
 
 </body>
 </html>

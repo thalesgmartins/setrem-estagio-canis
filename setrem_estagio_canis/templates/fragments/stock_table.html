@@ -8,17 +8,31 @@
                     <th scope="col" class="px-4 py-3.5 text-left font-semibold">Categoria</th>
                     <th scope="col" class="px-4 py-3.5 text-right font-semibold">Saldo Atual</th>
                     <th scope="col" class="px-4 py-3.5 text-left font-semibold">Status</th>
-                    <th scope="col" class="px-5 py-3.5 text-right font-semibold">Ajuste Rapido</th>
+                    <th scope="col" class="px-5 py-3.5 text-right font-semibold">Ações</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-subtle/70">
                 {% for item in stock_items %}
                 <tr class="hover:bg-elevated/50 transition-colors">
                     <td class="px-5 py-3.5">
-                        <p class="font-semibold text-ink-primary">{{ item.name }}</p>
-                        <p class="text-xs text-ink-muted tabular mt-0.5">
-                            Minimo: {{ item.min_quantity }} {{ item.unit }}
-                        </p>
+                        <div class="flex items-center gap-3">
+                            {% if item.image_filename %}
+                            <img
+                                src="/media/estoque/{{ item.id }}"
+                                alt="{{ item.name }}"
+                                class="w-10 h-10 rounded-xl object-cover border border-subtle shrink-0">
+                            {% else %}
+                            <div class="w-10 h-10 rounded-xl bg-elevated border border-subtle flex items-center justify-center text-ink-muted shrink-0">
+                                <i class="mdi mdi-package-variant-closed text-lg"></i>
+                            </div>
+                            {% endif %}
+                            <div>
+                                <p class="font-semibold text-ink-primary">{{ item.name }}</p>
+                                <p class="text-xs text-ink-muted tabular mt-0.5">
+                                    Mínimo: {{ item.min_quantity }} {{ item.unit }}
+                                </p>
+                            </div>
+                        </div>
                     </td>
                     <td class="px-4 py-3.5 whitespace-nowrap">
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-[11px] font-medium bg-elevated text-ink-secondary border border-subtle">
@@ -41,23 +55,16 @@
                         </span>
                         {% endif %}
                     </td>
-                    <td class="px-5 py-3.5 text-right whitespace-nowrap space-x-1">
-                        <form action="/estoque/movimentacao" method="post" class="inline">
-                            <input type="hidden" name="item_id" value="{{ item.id }}">
-                            <input type="hidden" name="movement_type" value="Saida">
-                            <input type="hidden" name="quantity" value="1">
-                            <button type="submit" title="Dar baixa de 1" class="px-2.5 py-1 rounded-lg bg-elevated hover:bg-subtle border border-subtle text-xs font-mono font-bold text-ink-primary">
-                                -1
-                            </button>
-                        </form>
-                        <form action="/estoque/movimentacao" method="post" class="inline">
-                            <input type="hidden" name="item_id" value="{{ item.id }}">
-                            <input type="hidden" name="movement_type" value="Entrada">
-                            <input type="hidden" name="quantity" value="1">
-                            <button type="submit" title="Adicionar 1" class="px-2.5 py-1 rounded-lg bg-patas-green/15 hover:bg-patas-green/25 border border-patas-green/30 text-xs font-mono font-bold text-patas-green">
-                                +1
-                            </button>
-                        </form>
+                    <td class="px-5 py-3.5 text-right whitespace-nowrap">
+                        <button
+                            type="button"
+                            hx-get="/modais/movimentacao-estoque?item_id={{ item.id }}"
+                            hx-target="#modal-container"
+                            hx-swap="innerHTML"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-elevated hover:bg-subtle border border-subtle text-xs font-medium text-ink-primary transition-colors">
+                            <i class="mdi mdi-swap-vertical text-sm text-patas-green"></i>
+                            <span>Movimentar</span>
+                        </button>
                     </td>
                 </tr>
                 {% endfor %}

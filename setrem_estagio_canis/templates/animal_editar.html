@@ -5,12 +5,24 @@
 
     <!-- Breadcrumb & Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div class="space-y-1">
-            <a href="/animais" class="inline-flex items-center gap-1 text-xs text-ink-secondary hover:text-ink-primary">
-                <i class="mdi mdi-arrow-left text-sm"></i>
-                <span>Voltar para Animais</span>
-            </a>
-            <h1 class="text-2xl font-bold tracking-tight text-ink-primary">{{ animal.name }}</h1>
+        <div class="flex items-center gap-4">
+            {% if animal.primary_photo_id %}
+            <img
+                src="/media/animais/{{ animal.primary_photo_id }}"
+                alt="{{ animal.name }}"
+                class="w-14 h-14 rounded-2xl object-cover border border-subtle shrink-0">
+            {% else %}
+            <div class="w-14 h-14 rounded-2xl bg-elevated border border-subtle flex items-center justify-center text-base font-bold text-ink-primary shrink-0">
+                {{ animal.name[:2]|upper }}
+            </div>
+            {% endif %}
+            <div class="space-y-1">
+                <a href="/animais" class="inline-flex items-center gap-1 text-xs text-ink-secondary hover:text-ink-primary">
+                    <i class="mdi mdi-arrow-left text-sm"></i>
+                    <span>Voltar para Animais</span>
+                </a>
+                <h1 class="text-2xl font-bold tracking-tight text-ink-primary">{{ animal.name }}</h1>
+            </div>
         </div>
         <div class="flex items-center gap-2">
             <a
@@ -18,7 +30,7 @@
                 target="_blank"
                 class="px-3.5 py-2 rounded-xl bg-elevated hover:bg-subtle border border-subtle text-xs font-medium text-ink-primary inline-flex items-center gap-1.5">
                 <i class="mdi mdi-file-document-outline text-base"></i>
-                <span>Emitir Termo de Adocao</span>
+                <span>Emitir Termo de Adoção</span>
             </a>
         </div>
     </div>
@@ -33,7 +45,7 @@
     <!-- Main Editable Animal Form -->
     <form action="/animais/{{ animal.id }}/editar" method="post" class="bg-surface border border-subtle rounded-2xl p-6 space-y-5 text-xs">
         <div class="flex items-center justify-between pb-3 border-b border-subtle">
-            <h2 class="text-sm font-semibold text-ink-primary">Dados do Animal e Localizacao</h2>
+            <h2 class="text-sm font-semibold text-ink-primary">Dados do Animal e Localização</h2>
             <span class="text-[11px] text-ink-muted">Entrada: {{ animal.intake_date }}</span>
         </div>
 
@@ -44,7 +56,7 @@
             </div>
 
             <div class="space-y-1.5">
-                <label class="block font-medium text-ink-secondary">Especie</label>
+                <label class="block font-medium text-ink-secondary">Espécie</label>
                 <select name="species" class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl text-sm text-ink-primary focus:outline-none focus:border-patas-blue">
                     <option value="Canina" {% if animal.species == 'Canina' %}selected{% endif %}>Canina</option>
                     <option value="Felina" {% if animal.species == 'Felina' %}selected{% endif %}>Felina</option>
@@ -52,13 +64,17 @@
             </div>
 
             <div class="space-y-1.5">
-                <label class="block font-medium text-ink-secondary">Raca</label>
+                <label class="block font-medium text-ink-secondary">Raça</label>
                 <input type="text" name="breed" value="{{ animal.breed }}" class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl text-sm text-ink-primary focus:outline-none focus:border-patas-blue">
             </div>
 
             <div class="space-y-1.5">
                 <label class="block font-medium text-ink-secondary">Porte</label>
-                <input type="text" name="size" value="{{ animal.size }}" class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl text-sm text-ink-primary focus:outline-none focus:border-patas-blue">
+                <select name="size" class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl text-sm text-ink-primary focus:outline-none focus:border-patas-blue">
+                    <option value="Pequeno" {% if animal.size == 'Pequeno' %}selected{% endif %}>Pequeno</option>
+                    <option value="Médio" {% if animal.size in ['Médio', 'Medio'] %}selected{% endif %}>Médio</option>
+                    <option value="Grande" {% if animal.size == 'Grande' %}selected{% endif %}>Grande</option>
+                </select>
             </div>
 
             <div class="space-y-1.5">
@@ -69,7 +85,7 @@
             <div class="space-y-1.5">
                 <label class="block font-medium text-ink-secondary">Sexo</label>
                 <select name="gender" class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl text-sm text-ink-primary focus:outline-none focus:border-patas-blue">
-                    <option value="Femea" {% if animal.gender == 'Femea' %}selected{% endif %}>Femea</option>
+                    <option value="Fêmea" {% if animal.gender in ['Fêmea', 'Femea'] %}selected{% endif %}>Fêmea</option>
                     <option value="Macho" {% if animal.gender == 'Macho' %}selected{% endif %}>Macho</option>
                     <option value="A avaliar" {% if animal.gender == 'A avaliar' %}selected{% endif %}>A avaliar</option>
                 </select>
@@ -78,20 +94,22 @@
             <div class="space-y-1.5">
                 <label class="block font-medium text-ink-secondary">Status</label>
                 <select name="status" class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl text-sm text-ink-primary focus:outline-none focus:border-patas-blue">
-                    {% for st in ['Acolhido', 'Lar Temporario', 'Em Tratamento', 'Disponivel para Adocao', 'Adotado'] %}
-                    <option value="{{ st }}" {% if animal.status == st %}selected{% endif %}>{{ st }}</option>
-                    {% endfor %}
+                    <option value="Acolhido" {% if animal.status == 'Acolhido' %}selected{% endif %}>Acolhido</option>
+                    <option value="Lar Temporário" {% if animal.status in ['Lar Temporário', 'Lar Temporario'] %}selected{% endif %}>Lar Temporário</option>
+                    <option value="Em Tratamento" {% if animal.status == 'Em Tratamento' %}selected{% endif %}>Em Tratamento</option>
+                    <option value="Disponível para Adoção" {% if animal.status in ['Disponível para Adoção', 'Disponivel para Adocao'] %}selected{% endif %}>Disponível para Adoção</option>
+                    <option value="Adotado" {% if animal.status == 'Adotado' %}selected{% endif %}>Adotado</option>
                 </select>
             </div>
 
             <div class="space-y-1.5 sm:col-span-2">
-                <label class="block font-medium text-ink-secondary">Localizacao / Lar Temporario</label>
+                <label class="block font-medium text-ink-secondary">Localização / Lar Temporário</label>
                 <input
                     type="text"
                     name="location"
                     list="location-suggestions"
                     value="{{ animal.location }}"
-                    placeholder="Selecione um lar temporario ou digite o local"
+                    placeholder="{% if location_options %}Selecione um lar cadastrado ou digite o local{% else %}Cadastre lares temporários na aba Lares ou digite o local{% endif %}"
                     class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl text-sm text-ink-primary focus:outline-none focus:border-patas-blue">
                 <datalist id="location-suggestions">
                     {% for loc in location_options %}
@@ -103,16 +121,16 @@
 
         <label class="inline-flex items-center gap-2.5 cursor-pointer select-none pt-1">
             <input type="checkbox" name="neutered" {% if animal.neutered %}checked{% endif %} class="w-4 h-4 accent-[#05AC78] rounded">
-            <span class="text-xs font-medium text-ink-primary">Animal castrado</span>
+            <span class="text-xs font-medium text-ink-primary">Já é castrado</span>
         </label>
 
         <div class="space-y-1.5">
-            <label class="block font-medium text-ink-secondary">Temperamento (exibido no catalogo publico de adocao)</label>
+            <label class="block font-medium text-ink-secondary">Temperamento (exibido no catálogo público de adoção)</label>
             <input type="text" name="temperament" value="{{ animal.temperament }}" class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl text-sm text-ink-primary focus:outline-none focus:border-patas-blue">
         </div>
 
         <div class="space-y-1.5">
-            <label class="block font-medium text-ink-secondary">Observacoes do resgate</label>
+            <label class="block font-medium text-ink-secondary">Observações do resgate</label>
             <textarea rows="2" name="rescue_notes" class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl text-sm text-ink-primary focus:outline-none focus:border-patas-blue">{{ animal.rescue_notes }}</textarea>
         </div>
 
@@ -130,27 +148,86 @@
                 type="submit"
                 class="px-5 py-2.5 rounded-xl bg-patas-green hover:bg-patas-green-hover text-[#061c14] font-semibold inline-flex items-center gap-1.5">
                 <i class="mdi mdi-content-save-outline text-base"></i>
-                <span>Salvar Alteracoes</span>
+                <span>Salvar Alterações</span>
             </button>
         </div>
     </form>
+
+    <!-- Animal Photos Gallery -->
+    <section class="bg-surface border border-subtle rounded-2xl p-6 space-y-5">
+        <div class="flex items-center justify-between pb-3 border-b border-subtle">
+            <div>
+                <h2 class="text-sm font-semibold text-ink-primary">Fotos do Animal ({{ animal.photos|length }})</h2>
+                <p class="text-xs text-ink-secondary mt-0.5">A foto principal aparece na listagem e no catálogo público de adoção. Imagens são redimensionadas automaticamente.</p>
+            </div>
+        </div>
+
+        <form action="/animais/{{ animal.id }}/fotos" method="post" enctype="multipart/form-data" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 p-4 rounded-xl bg-elevated/60 border border-subtle text-xs">
+            <input
+                type="file"
+                name="fotos"
+                accept="image/*"
+                multiple
+                required
+                class="flex-1 px-3 py-2 bg-surface border border-subtle rounded-lg text-ink-secondary file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-patas-green/15 file:text-patas-green hover:file:bg-patas-green/25">
+            <button type="submit" class="px-4 py-2.5 rounded-lg bg-patas-green hover:bg-patas-green-hover text-[#061c14] font-semibold inline-flex items-center justify-center gap-1.5 shrink-0">
+                <i class="mdi mdi-image-plus-outline text-base"></i>
+                <span>Adicionar Fotos</span>
+            </button>
+        </form>
+
+        {% if animal.photos %}
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            {% for photo in animal.photos %}
+            <div class="rounded-xl overflow-hidden bg-elevated border {% if photo.is_primary %}border-patas-green{% else %}border-subtle{% endif %} flex flex-col">
+                <div class="relative aspect-square bg-black/20">
+                    <img src="/media/animais/{{ photo.id }}" alt="Foto de {{ animal.name }}" class="w-full h-full object-cover">
+                    {% if photo.is_primary %}
+                    <span class="absolute top-2 left-2 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-patas-green text-[#061c14]">
+                        Principal
+                    </span>
+                    {% endif %}
+                </div>
+                <div class="p-2 flex items-center justify-between gap-1 text-[11px]">
+                    {% if not photo.is_primary %}
+                    <form action="/animais/{{ animal.id }}/fotos/{{ photo.id }}/principal" method="post">
+                        <button type="submit" class="px-2 py-1 rounded-md bg-surface hover:bg-subtle border border-subtle text-ink-primary font-medium">
+                            Definir principal
+                        </button>
+                    </form>
+                    {% else %}
+                    <span class="text-ink-muted px-1">Capa atual</span>
+                    {% endif %}
+                    <form action="/animais/{{ animal.id }}/fotos/{{ photo.id }}/excluir" method="post" onsubmit="return confirm('Remover esta foto?');">
+                        <button type="submit" title="Remover foto" class="p-1 rounded-md bg-surface hover:bg-red-500/15 border border-subtle text-ink-secondary hover:text-red-400">
+                            <i class="mdi mdi-trash-can-outline text-sm"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-xs text-ink-muted">Nenhuma foto enviada ainda. Adicione fotos para destacar {{ animal.name }} no catálogo público.</p>
+        {% endif %}
+    </section>
 
     <!-- Secondary Section: Vet Visits & Care History -->
     <section class="bg-surface border border-subtle rounded-2xl p-6 space-y-5">
         <div class="flex items-center justify-between pb-3 border-b border-subtle">
             <div>
-                <h2 class="text-sm font-semibold text-ink-primary">Historico de Consultas e Cuidados</h2>
-                <p class="text-xs text-ink-secondary mt-0.5">Registro de idas a clinicas veterinarias parceiras e procedimentos</p>
+                <h2 class="text-sm font-semibold text-ink-primary">Histórico de Consultas e Cuidados</h2>
+                <p class="text-xs text-ink-secondary mt-0.5">Registro de idas a clínicas veterinárias parceiras e procedimentos</p>
             </div>
         </div>
 
         <form action="/animais/{{ animal.id }}/atendimentos" method="post" class="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 rounded-xl bg-elevated/60 border border-subtle text-xs">
-            <input type="text" name="title" required placeholder="O que foi feito (ex: Consulta, Castracao)" class="px-3 py-2 bg-surface border border-subtle rounded-lg text-ink-primary placeholder-ink-muted focus:outline-none focus:border-patas-blue">
-            <input type="text" name="veterinarian" required placeholder="Clinica ou veterinario parceiro" class="px-3 py-2 bg-surface border border-subtle rounded-lg text-ink-primary placeholder-ink-muted focus:outline-none focus:border-patas-blue">
+            <input type="text" name="title" required placeholder="O que foi feito (ex: Consulta, Castração)" class="px-3 py-2 bg-surface border border-subtle rounded-lg text-ink-primary placeholder-ink-muted focus:outline-none focus:border-patas-blue">
+            <input type="text" name="veterinarian" required placeholder="Clínica ou veterinário parceiro" class="px-3 py-2 bg-surface border border-subtle rounded-lg text-ink-primary placeholder-ink-muted focus:outline-none focus:border-patas-blue">
             <button type="submit" class="px-4 py-2 rounded-lg bg-patas-green hover:bg-patas-green-hover text-[#061c14] font-semibold">
                 + Registrar Consulta
             </button>
-            <textarea rows="2" name="notes" required placeholder="Observacoes da clinica ou orientacoes..." class="sm:col-span-3 px-3 py-2 bg-surface border border-subtle rounded-lg text-ink-primary placeholder-ink-muted focus:outline-none focus:border-patas-blue"></textarea>
+            <textarea rows="2" name="notes" required placeholder="Observações da clínica ou orientações..." class="sm:col-span-3 px-3 py-2 bg-surface border border-subtle rounded-lg text-ink-primary placeholder-ink-muted focus:outline-none focus:border-patas-blue"></textarea>
         </form>
 
         {% if animal.clinical_events %}

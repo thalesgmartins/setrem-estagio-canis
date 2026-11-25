@@ -6,7 +6,7 @@
     <!-- Page Heading & Clear Primary Actions -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold tracking-tight text-ink-primary">Visao Geral</h1>
+            <h1 class="text-2xl font-bold tracking-tight text-ink-primary">Visão Geral</h1>
             <p class="text-sm text-ink-secondary mt-0.5">
                 Resumo operacional de animais, lares, suprimentos e caixa.
             </p>
@@ -19,7 +19,7 @@
                 hx-swap="innerHTML"
                 class="px-3.5 py-2 rounded-xl bg-elevated hover:bg-subtle border border-subtle text-xs font-medium text-ink-primary transition-colors inline-flex items-center gap-1.5">
                 <i class="mdi mdi-cash-plus text-base"></i>
-                <span>Novo Lancamento</span>
+                <span>Novo Lançamento</span>
             </button>
             <button
                 type="button"
@@ -35,7 +35,7 @@
 
     <!-- 4 Focused KPIs -->
     <section aria-label="Indicadores Operacionais" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <a href="/animais" class="bg-surface border border-subtle hover:border-[#3f3f3f] rounded-xl p-5 flex flex-col justify-between gap-4 transition-colors">
+        <a href="/animais" class="bg-surface border border-subtle hover:border-patas-green/50 rounded-xl p-5 flex flex-col justify-between gap-4 transition-colors">
             <div class="flex items-center justify-between">
                 <span class="text-xs font-medium text-ink-secondary">Animais Acolhidos</span>
                 <span class="w-8 h-8 rounded-lg bg-elevated border border-subtle flex items-center justify-center text-ink-primary">
@@ -45,27 +45,27 @@
             <div>
                 <p class="text-3xl font-bold text-ink-primary tabular tracking-tight">{{ metrics.total_animals }}</p>
                 <p class="text-xs text-ink-secondary mt-1 tabular">
-                    {{ metrics.dogs_count }} caes · {{ metrics.cats_count }} gatos
+                    {{ metrics.dogs_count }} cães · {{ metrics.cats_count }} gatos
                 </p>
             </div>
         </a>
 
-        <a href="/animais" class="bg-surface border border-subtle hover:border-[#3f3f3f] rounded-xl p-5 flex flex-col justify-between gap-4 transition-colors">
+        <a href="/animais" class="bg-surface border border-subtle hover:border-patas-green/50 rounded-xl p-5 flex flex-col justify-between gap-4 transition-colors">
             <div class="flex items-center justify-between">
-                <span class="text-xs font-medium text-ink-secondary">Disponiveis p/ Adocao</span>
+                <span class="text-xs font-medium text-ink-secondary">Disponíveis p/ Adoção</span>
                 <span class="w-8 h-8 rounded-lg bg-patas-green/15 border border-patas-green/25 flex items-center justify-center text-patas-green">
                     <i class="mdi mdi-heart-outline text-base"></i>
                 </span>
             </div>
             <div>
                 <p class="text-3xl font-bold text-ink-primary tabular tracking-tight">{{ metrics.available_count }}</p>
-                <p class="text-xs text-patas-green mt-1">Visiveis no catalogo publico</p>
+                <p class="text-xs text-patas-green mt-1">Visíveis no catálogo público</p>
             </div>
         </a>
 
-        <a href="/lares" class="bg-surface border border-subtle hover:border-[#3f3f3f] rounded-xl p-5 flex flex-col justify-between gap-4 transition-colors">
+        <a href="/lares" class="bg-surface border border-subtle hover:border-patas-blue/50 rounded-xl p-5 flex flex-col justify-between gap-4 transition-colors">
             <div class="flex items-center justify-between">
-                <span class="text-xs font-medium text-ink-secondary">Em Lar Temporario</span>
+                <span class="text-xs font-medium text-ink-secondary">Em Lar Temporário</span>
                 <span class="w-8 h-8 rounded-lg bg-patas-blue/15 border border-patas-blue/25 flex items-center justify-center text-patas-blue">
                     <i class="mdi mdi-home-heart text-base"></i>
                 </span>
@@ -76,7 +76,7 @@
             </div>
         </a>
 
-        <a href="/financeiro" class="bg-surface border border-subtle hover:border-[#3f3f3f] rounded-xl p-5 flex flex-col justify-between gap-4 transition-colors">
+        <a href="/financeiro" class="bg-surface border border-subtle hover:border-patas-green/50 rounded-xl p-5 flex flex-col justify-between gap-4 transition-colors">
             <div class="flex items-center justify-between">
                 <span class="text-xs font-medium text-ink-secondary">Saldo em Caixa</span>
                 <span class="w-8 h-8 rounded-lg bg-patas-green/15 border border-patas-green/25 flex items-center justify-center text-patas-green">
@@ -98,7 +98,7 @@
         <div class="px-5 py-4 border-b border-subtle flex items-center justify-between gap-3">
             <div class="flex items-center gap-2">
                 <i class="mdi mdi-alert-outline text-patas-orange text-lg"></i>
-                <h2 class="text-sm font-semibold text-ink-primary">Alertas e Pendencias</h2>
+                <h2 class="text-sm font-semibold text-ink-primary">Alertas e Pendências</h2>
             </div>
             <span class="px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-patas-orange/15 text-patas-orange border border-patas-orange/25 tabular">
                 {{ alerts|length }}

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aguardando Aprovacao — Laika</title>
+    <title>Aguardando Aprovação — Laika</title>
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <link rel="stylesheet" href="/static/css/tailwind.min.css">
     <link rel="stylesheet" href="/static/css/materialdesignicons.min.css">
@@ -15,17 +15,17 @@
         </div>
 
         <div class="space-y-2">
-            <h1 class="text-xl font-bold tracking-tight">Acesso aguardando aprovacao</h1>
+            <h1 class="text-xl font-bold tracking-tight">Acesso aguardando aprovação</h1>
             <p class="text-sm text-ink-secondary leading-relaxed">
-                Ola, <strong class="text-ink-primary">{{ current_user.nome }}</strong> ({{ current_user.email }}).
-                Sua conta foi registrada e aguarda liberacao da Coordenacao para acessar o painel interno.
+                Olá, <strong class="text-ink-primary">{{ current_user.nome }}</strong> ({{ current_user.email }}).
+                Sua conta foi registrada e aguarda liberação da Coordenação para acessar o painel interno.
             </p>
         </div>
 
         <div class="pt-2 flex flex-col gap-2.5">
             <a href="/adocao"
                class="w-full py-2.5 px-4 rounded-xl bg-patas-green hover:bg-patas-green-hover text-[#061c14] text-xs font-semibold transition-colors">
-                Ver Catalogo Publico de Adocao
+                Ver Catálogo Público de Adoção
             </a>
             <a href="/auth/logout"
                class="w-full py-2.5 px-4 rounded-xl bg-elevated hover:bg-subtle border border-subtle text-xs font-medium text-ink-primary transition-colors">

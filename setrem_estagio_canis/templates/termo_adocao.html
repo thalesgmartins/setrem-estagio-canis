@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Termo de Adocao Responsavel — {{ animal.name }} | Laika</title>
+    <title>Termo de Adoção Responsável — {{ animal.name }} | Laika</title>
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <link rel="stylesheet" href="/static/css/tailwind.min.css">
     <style>
@@ -25,7 +25,7 @@
         <div class="flex items-center gap-3">
             <img src="/static/logo.jpg" alt="Logo Patas e Pelos" class="w-8 h-8 rounded-lg bg-white p-0.5 object-contain">
             <div>
-                <p class="text-xs font-semibold text-[#f5f5f5]">Termo de Adocao · {{ animal.name }}</p>
+                <p class="text-xs font-semibold text-[#f5f5f5]">Termo de Adoção · {{ animal.name }}</p>
                 <p class="text-[11px] text-[#a0a0a0]">Laika · Patas e Pelos</p>
             </div>
         </div>
@@ -53,10 +53,10 @@
                 <img src="/static/logo.jpg" alt="Logo Patas e Pelos" class="w-12 h-12 object-contain">
                 <div>
                     <h1 class="text-lg font-bold tracking-tight text-neutral-900 uppercase">
-                        Termo de Responsabilidade e Adocao de Animal
+                        Termo de Responsabilidade e Adoção de Animal
                     </h1>
                     <p class="text-xs text-neutral-500 mt-0.5">
-                        Associacao de Protecao Animal ONG Patas e Pelos — Horizontina / RS
+                        Associação de Proteção Animal ONG Patas e Pelos — Horizontina / RS
                     </p>
                 </div>
             </div>
@@ -66,19 +66,19 @@
         <!-- Content -->
         <div class="space-y-5 text-xs leading-relaxed text-neutral-700">
             <p>
-                Pelo presente instrumento, a <strong>Associacao de Protecao Animal Patas e Pelos</strong> efetua a doacao do animal abaixo qualificado para o(a) Adotante responsavel, que assume integralmente a guarda e o compromisso de bem-estar do animal:
+                Pelo presente instrumento, a <strong>Associação de Proteção Animal Patas e Pelos</strong> efetua a doação do animal abaixo qualificado para o(a) Adotante responsável, que assume integralmente a guarda e o compromisso de bem-estar do animal:
             </p>
 
             <!-- Animal Info Box -->
             <div class="bg-neutral-50 p-4 rounded-lg border border-neutral-200 grid grid-cols-2 gap-3">
                 <div><strong>Nome do Animal:</strong> {{ animal.name }}</div>
-                <div><strong>Especie:</strong> {{ animal.species }}</div>
-                <div><strong>Raca:</strong> {{ animal.breed }}</div>
+                <div><strong>Espécie:</strong> {{ animal.species }}</div>
+                <div><strong>Raça:</strong> {{ animal.breed }}</div>
                 <div><strong>Sexo:</strong> {{ animal.gender }}</div>
                 <div><strong>Idade Aproximada:</strong> {{ animal.age_approx }}</div>
                 <div><strong>Porte:</strong> {{ animal.size }}</div>
-                <div><strong>Microchip:</strong> <span class="font-mono">{{ animal.microchip or 'Nao chipado' }}</span></div>
-                <div><strong>Castracao:</strong> {% if animal.neutered %}Sim, castrado(a){% else %}Compromisso de castracao pendente{% endif %}</div>
+                <div><strong>Microchip:</strong> <span class="font-mono">{{ animal.microchip or 'Não chipado' }}</span></div>
+                <div><strong>Castração:</strong> {% if animal.neutered %}Sim, castrado(a){% else %}Compromisso de castração pendente{% endif %}</div>
             </div>
 
             <!-- Adopter Fillable Fields -->
@@ -90,21 +90,21 @@
                     <div><strong>Nome Completo:</strong> ____________________________________</div>
                     <div><strong>CPF:</strong> ____________________________</div>
                     <div><strong>Telefone / WhatsApp:</strong> ____________________________</div>
-                    <div><strong>Endereco Residencial:</strong> ____________________________</div>
+                    <div><strong>Endereço Residencial:</strong> ____________________________</div>
                 </div>
             </section>
 
             <!-- Commitments -->
             <section class="space-y-2.5">
                 <h2 class="font-bold text-neutral-900 uppercase tracking-wider text-[11px] border-b border-neutral-200 pb-1">
-                    Declaracao de Compromisso
+                    Declaração de Compromisso
                 </h2>
                 <ul class="list-disc pl-5 space-y-1.5 text-neutral-600">
-                    <li>Garantir abrigo seguro, alimentacao adequada, assistencia veterinaria e afeto ao animal.</li>
-                    <li>Nao manter o animal permanentemente acorrentado ou em espaco insalubre.</li>
-                    <li>Manter as vacinas polivalente e antirrabica anualmente atualizadas.</li>
-                    <li>Permitir o acompanhamento pos-adocao por membros da ONG Patas e Pelos.</li>
-                    <li>Comunicar imediatamente a entidade em caso de fuga, doenca grave ou falecimento do animal, nao podendo repassa-lo a terceiros sem previa anuencia.</li>
+                    <li>Garantir abrigo seguro, alimentação adequada, assistência veterinária e afeto ao animal.</li>
+                    <li>Não manter o animal permanentemente acorrentado ou em espaço insalubre.</li>
+                    <li>Manter as vacinas polivalente e antirrábica anualmente atualizadas.</li>
+                    <li>Permitir o acompanhamento pós-adoção por membros da ONG Patas e Pelos.</li>
+                    <li>Comunicar imediatamente a entidade em caso de fuga, doença grave ou falecimento do animal, não podendo repassá-lo a terceiros sem prévia anuência.</li>
                 </ul>
             </section>
 
@@ -115,7 +115,7 @@
                 </div>
                 <div class="border-t border-neutral-400 pt-2">
                     <p class="font-semibold text-neutral-800">ONG Patas e Pelos</p>
-                    <p class="text-[10px] text-neutral-500 mt-0.5">Responsavel pelo Encaminhamento</p>
+                    <p class="text-[10px] text-neutral-500 mt-0.5">Responsável pelo Encaminhamento</p>
                 </div>
             </div>
         </div>

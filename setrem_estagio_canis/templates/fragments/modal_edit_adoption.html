@@ -1,0 +1,59 @@
+<div
+    class="fixed inset-0 z-50 bg-black/75 backdrop-blur-[2px] flex items-center justify-center p-4 overflow-y-auto"
+    onclick="if (event.target === this) closeModal();">
+    <div class="bg-surface border border-subtle rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl">
+        <div class="px-6 py-4 border-b border-subtle flex items-center justify-between">
+            <div>
+                <h3 class="text-base font-bold text-ink-primary">Editar Adoção</h3>
+                <p class="text-xs text-ink-secondary mt-0.5">{{ adoption.animal_name }} ({{ adoption.animal_species }})</p>
+            </div>
+            <button type="button" onclick="closeModal()" aria-label="Fechar" class="p-1.5 rounded-lg text-ink-secondary hover:text-ink-primary hover:bg-elevated">
+                <i class="mdi mdi-close text-lg"></i>
+            </button>
+        </div>
+
+        <form action="/adocoes/{{ adoption.id }}/editar" method="post" class="p-6 space-y-4 text-xs">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="space-y-1.5 sm:col-span-2">
+                    <label class="block font-medium text-ink-secondary">Nome do adotante</label>
+                    <input type="text" name="adopter_name" required value="{{ adoption.adopter_name }}" class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl text-ink-primary focus:outline-none focus:border-patas-blue">
+                </div>
+                <div class="space-y-1.5">
+                    <label class="block font-medium text-ink-secondary">CPF</label>
+                    <input type="text" name="adopter_cpf" required value="{{ adoption.adopter_cpf }}" class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl font-mono text-ink-primary focus:outline-none focus:border-patas-blue">
+                </div>
+                <div class="space-y-1.5">
+                    <label class="block font-medium text-ink-secondary">Telefone / WhatsApp</label>
+                    <input type="text" name="adopter_contact" required value="{{ adoption.adopter_contact }}" class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl font-mono text-ink-primary focus:outline-none focus:border-patas-blue">
+                </div>
+                <div class="space-y-1.5 sm:col-span-2">
+                    <label class="block font-medium text-ink-secondary">Endereço</label>
+                    <input type="text" name="adopter_address" required value="{{ adoption.adopter_address }}" class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl text-ink-primary focus:outline-none focus:border-patas-blue">
+                </div>
+                <div class="space-y-1.5">
+                    <label class="block font-medium text-ink-secondary">Data da adoção</label>
+                    <input type="text" name="adoption_date" required value="{{ adoption.adoption_date }}" placeholder="DD/MM/AAAA" class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl font-mono text-ink-primary focus:outline-none focus:border-patas-blue">
+                </div>
+            </div>
+
+            <div class="pt-3 border-t border-subtle flex items-center justify-between gap-2.5">
+                <button
+                    type="submit"
+                    formaction="/adocoes/{{ adoption.id }}/excluir"
+                    onclick="return confirm('Remover este registro de adoção?');"
+                    class="px-3.5 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/25 text-red-400 font-medium inline-flex items-center gap-1.5">
+                    <i class="mdi mdi-trash-can-outline text-sm"></i>
+                    <span>Excluir</span>
+                </button>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl bg-elevated hover:bg-subtle border border-subtle font-medium text-ink-primary">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-patas-green hover:bg-patas-green-hover text-[#061c14] font-semibold">
+                        Salvar Alterações
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

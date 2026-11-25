@@ -1,0 +1,96 @@
+<div
+    class="fixed inset-0 z-50 bg-black/75 backdrop-blur-[2px] flex items-center justify-center p-4 overflow-y-auto"
+    onclick="if (event.target === this) closeModal();">
+    <div class="bg-surface border border-subtle rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl my-auto">
+        <div class="px-6 py-4 border-b border-subtle flex items-center justify-between gap-3">
+            <div>
+                <h3 class="text-lg font-bold text-ink-primary">{{ animal.name }}</h3>
+                <p class="text-xs text-ink-secondary">{{ animal.species }} · {{ animal.breed }}</p>
+            </div>
+            <button type="button" onclick="closeModal()" aria-label="Fechar" class="p-1.5 rounded-lg text-ink-secondary hover:text-ink-primary hover:bg-elevated">
+                <i class="mdi mdi-close text-lg"></i>
+            </button>
+        </div>
+
+        <div class="p-6 space-y-5 max-h-[80vh] overflow-y-auto">
+            {% if animal.photos %}
+            <div class="space-y-3">
+                <div class="rounded-xl overflow-hidden bg-elevated border border-subtle aspect-[16/10] flex items-center justify-center">
+                    <img
+                        id="catalog-main-photo"
+                        src="/media/animais/{{ animal.primary_photo_id }}"
+                        alt="{{ animal.name }}"
+                        class="w-full h-full object-contain bg-black/20">
+                </div>
+                {% if animal.photos|length > 1 %}
+                <div class="flex items-center gap-2 overflow-x-auto pb-1">
+                    {% for photo in animal.photos %}
+                    <button
+                        type="button"
+                        onclick="document.getElementById('catalog-main-photo').src='/media/animais/{{ photo.id }}';"
+                        class="w-16 h-16 rounded-lg overflow-hidden border border-subtle hover:border-patas-green shrink-0 focus:outline-none focus:border-patas-green">
+                        <img
+                            src="/media/animais/{{ photo.id }}"
+                            alt="Foto de {{ animal.name }}"
+                            class="w-full h-full object-cover">
+                    </button>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-xl bg-elevated/70 border border-subtle text-xs">
+                <div>
+                    <span class="block text-[11px] text-ink-muted">Idade</span>
+                    <span class="font-semibold text-ink-primary">{{ animal.age_approx }}</span>
+                </div>
+                <div>
+                    <span class="block text-[11px] text-ink-muted">Sexo</span>
+                    <span class="font-semibold text-ink-primary">{{ animal.gender }}</span>
+                </div>
+                <div>
+                    <span class="block text-[11px] text-ink-muted">Porte</span>
+                    <span class="font-semibold text-ink-primary">{{ animal.size }}</span>
+                </div>
+                <div>
+                    <span class="block text-[11px] text-ink-muted">Castração</span>
+                    <span class="font-semibold {% if animal.neutered %}text-patas-green{% else %}text-patas-orange{% endif %}">
+                        {% if animal.neutered %}Castrado(a){% else %}A combinar{% endif %}
+                    </span>
+                </div>
+            </div>
+
+            {% if animal.temperament %}
+            <div class="space-y-1">
+                <h4 class="text-xs font-semibold text-ink-secondary uppercase tracking-wider">Temperamento</h4>
+                <p class="text-sm text-ink-primary leading-relaxed">{{ animal.temperament }}</p>
+            </div>
+            {% endif %}
+
+            {% if animal.rescue_notes %}
+            <div class="space-y-1">
+                <h4 class="text-xs font-semibold text-ink-secondary uppercase tracking-wider">História</h4>
+                <p class="text-xs text-ink-secondary leading-relaxed">{{ animal.rescue_notes }}</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="px-6 py-4 border-t border-subtle bg-elevated/30 flex items-center justify-between gap-3">
+            <span class="text-xs text-ink-muted">Adoção responsável com termo</span>
+            <div class="flex items-center gap-2">
+                <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl bg-elevated hover:bg-subtle border border-subtle text-xs font-medium text-ink-primary">
+                    Fechar
+                </button>
+                <a
+                    href="https://wa.me/{{ ong_whatsapp }}?text=Ol%C3%A1!%20Tenho%20interesse%20em%20adotar%20{{ animal.name }}%20pelo%20cat%C3%A1logo%20da%20ONG%20Patas%20e%20Pelos."
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="px-4 py-2 rounded-xl bg-patas-green hover:bg-patas-green-hover text-[#061c14] text-xs font-semibold inline-flex items-center gap-1.5 transition-colors">
+                    <i class="mdi mdi-whatsapp text-base"></i>
+                    <span>Quero Adotar</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

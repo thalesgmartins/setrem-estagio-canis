@@ -1,25 +1,25 @@
 <div
     class="fixed inset-0 z-50 bg-black/75 backdrop-blur-[2px] flex items-center justify-center p-4 overflow-y-auto"
     onclick="if (event.target === this) closeModal();">
-    <div class="bg-surface border border-subtle rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl">
+    <div class="bg-surface border border-subtle rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl my-auto">
         <div class="px-6 py-4 border-b border-subtle flex items-center justify-between">
             <div>
                 <h3 class="text-base font-bold text-ink-primary">Cadastrar Animal</h3>
-                <p class="text-xs text-ink-secondary mt-0.5">Preencha os dados basicos; voce pode editar tudo depois</p>
+                <p class="text-xs text-ink-secondary mt-0.5">Preencha os dados básicos; você pode editar tudo depois</p>
             </div>
             <button type="button" onclick="closeModal()" aria-label="Fechar" class="p-1.5 rounded-lg text-ink-secondary hover:text-ink-primary hover:bg-elevated">
                 <i class="mdi mdi-close text-lg"></i>
             </button>
         </div>
 
-        <form action="/animais" method="post" class="p-6 space-y-4 text-xs">
+        <form action="/animais" method="post" enctype="multipart/form-data" class="p-6 space-y-4 text-xs">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="space-y-1.5">
                     <label class="block font-medium text-ink-secondary">Nome</label>
                     <input type="text" name="name" required placeholder="Ex: Bob" class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl text-ink-primary placeholder-ink-muted focus:outline-none focus:border-patas-blue">
                 </div>
                 <div class="space-y-1.5">
-                    <label class="block font-medium text-ink-secondary">Especie</label>
+                    <label class="block font-medium text-ink-secondary">Espécie</label>
                     <select name="species" class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl text-ink-primary focus:outline-none focus:border-patas-blue">
                         <option value="Canina">Canina</option>
                         <option value="Felina">Felina</option>
@@ -29,14 +29,14 @@
                     <label class="block font-medium text-ink-secondary">Porte</label>
                     <select name="size" class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl text-ink-primary focus:outline-none focus:border-patas-blue">
                         <option value="Pequeno">Pequeno</option>
-                        <option value="Medio">Medio</option>
+                        <option value="Médio">Médio</option>
                         <option value="Grande">Grande</option>
                     </select>
                 </div>
                 <div class="space-y-1.5">
                     <label class="block font-medium text-ink-secondary">Sexo</label>
                     <select name="gender" class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl text-ink-primary focus:outline-none focus:border-patas-blue">
-                        <option value="Femea">Femea</option>
+                        <option value="Fêmea">Fêmea</option>
                         <option value="Macho">Macho</option>
                         <option value="A avaliar">A avaliar</option>
                     </select>
@@ -45,14 +45,14 @@
                     <label class="block font-medium text-ink-secondary">Status inicial</label>
                     <select name="status" class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl text-ink-primary focus:outline-none focus:border-patas-blue">
                         <option value="Acolhido">Acolhido</option>
-                        <option value="Lar Temporario">Lar Temporario</option>
-                        <option value="Disponivel para Adocao">Disponivel para Adocao</option>
+                        <option value="Lar Temporário">Lar Temporário</option>
+                        <option value="Disponível para Adoção">Disponível para Adoção</option>
                         <option value="Em Tratamento">Em Tratamento</option>
                     </select>
                 </div>
                 <div class="space-y-1.5">
-                    <label class="block font-medium text-ink-secondary">Localizacao / Lar</label>
-                    <input type="text" name="location" list="modal-loc-options" required placeholder="Selecione ou digite o local" class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl text-ink-primary placeholder-ink-muted focus:outline-none focus:border-patas-blue">
+                    <label class="block font-medium text-ink-secondary">Localização / Lar Temporário</label>
+                    <input type="text" name="location" list="modal-loc-options" required placeholder="{% if location_options %}Selecione um lar cadastrado ou digite{% else %}Digite o local ou cadastre um lar em Lares{% endif %}" class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl text-ink-primary placeholder-ink-muted focus:outline-none focus:border-patas-blue">
                     <datalist id="modal-loc-options">
                         {% for loc in location_options %}
                         <option value="{{ loc }}"></option>
@@ -62,13 +62,24 @@
             </div>
 
             <div class="space-y-1.5">
-                <label class="block font-medium text-ink-secondary">Observacoes do resgate</label>
-                <textarea rows="2" name="rescue_notes" required placeholder="Local do resgate e condicao aparente..." class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl text-ink-primary placeholder-ink-muted focus:outline-none focus:border-patas-blue"></textarea>
+                <label class="block font-medium text-ink-secondary">Fotos do animal (opcional)</label>
+                <input
+                    type="file"
+                    name="fotos"
+                    accept="image/*"
+                    multiple
+                    class="w-full px-3 py-2 bg-elevated border border-subtle rounded-xl text-xs text-ink-secondary file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-patas-green/15 file:text-patas-green hover:file:bg-patas-green/25">
+                <p class="text-[11px] text-ink-muted">Você pode selecionar uma ou mais fotos. Elas são otimizadas automaticamente para economizar espaço.</p>
+            </div>
+
+            <div class="space-y-1.5">
+                <label class="block font-medium text-ink-secondary">Observações do resgate</label>
+                <textarea rows="2" name="rescue_notes" required placeholder="Local do resgate e condição aparente..." class="w-full px-3.5 py-2.5 bg-elevated border border-subtle rounded-xl text-ink-primary placeholder-ink-muted focus:outline-none focus:border-patas-blue"></textarea>
             </div>
 
             <label class="inline-flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" name="neutered" class="w-4 h-4 accent-[#05AC78]">
-                <span class="text-xs font-medium text-ink-primary">Ja e castrado</span>
+                <span class="text-xs font-medium text-ink-primary">Já é castrado</span>
             </label>
 
             <div class="pt-3 border-t border-subtle flex justify-end gap-2.5">
