@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "setrem-estagio-canis"
-version = "0.4.0"
+version = "0.4.1"
 description = "Sistema de Gestao para centralizar resgates, adocoes e recursos na Patas e Pelos"
 readme = "README.md"
 requires-python = ">=3.10"

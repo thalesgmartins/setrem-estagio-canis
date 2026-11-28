@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/thalesgmartins/setrem-estagio-canis/compare/v0.4.0...v0.4.1) (2026-11-28)
+
+
+### Bug Fixes
+
+* **backup:** upgrade docker base to debian trixie for pg_dump 17 and log stderr ([069d95f](https://github.com/thalesgmartins/setrem-estagio-canis/commit/069d95f5e348053720c91bb403a092812def2ae1))
+
 ## [0.4.0](https://github.com/thalesgmartins/setrem-estagio-canis/compare/v0.3.1...v0.4.0) (2026-11-28)
 
 
