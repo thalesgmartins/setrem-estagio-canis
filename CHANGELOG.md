@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.4.0](https://github.com/thalesgmartins/setrem-estagio-canis/compare/v0.3.1...v0.4.0) (2026-11-28)
+
+
+### Features
+
+* **admin:** add backup trigger and download panel in admin settings ([1b18b0b](https://github.com/thalesgmartins/setrem-estagio-canis/commit/1b18b0be212b52c17245c8aaac6d8745a1f9e2e2))
+* **backup:** add automated database and media backup engine with rclone support ([c841e41](https://github.com/thalesgmartins/setrem-estagio-canis/commit/c841e411c594e6e50b4528f23f59d64587d42639))
+
+
+### Documentation
+
+* document automated backups, Google Drive rclone setup, and restore steps ([aa6f25d](https://github.com/thalesgmartins/setrem-estagio-canis/commit/aa6f25d1c1c211821cd05340d227b95dcbbbdec6))
+
 ## [0.3.1](https://github.com/thalesgmartins/setrem-estagio-canis/compare/v0.3.0...v0.3.1) (2026-11-28)
 
 
