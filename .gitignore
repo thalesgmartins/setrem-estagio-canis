@@ -220,3 +220,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Backups, rclone credentials, and test outputs
+backups/
+rclone/
+test_outputs/

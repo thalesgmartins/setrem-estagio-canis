@@ -44,6 +44,13 @@ SEED_DEMO_DATA = os.getenv("SEED_DEMO_DATA", "false").strip().lower() in {
     "yes",
 }
 
+# Automated backup settings (local storage + optional rclone Google Drive sync)
+BACKUP_DIR = Path(os.getenv("BACKUP_DIR", str(BASE_DIR / "backups")))
+BACKUP_RETENTION_DAYS = int(os.getenv("BACKUP_RETENTION_DAYS", "30"))
+BACKUP_INTERVAL_HOURS = int(os.getenv("BACKUP_INTERVAL_HOURS", "24"))
+BACKUP_RCLONE_REMOTE = os.getenv("BACKUP_RCLONE_REMOTE", "").strip()
+BACKUP_RCLONE_CONFIG = os.getenv("BACKUP_RCLONE_CONFIG", "").strip()
+
 
 def google_oauth_configured() -> bool:
     """Return True when Google OAuth credentials are configured in the environment.
