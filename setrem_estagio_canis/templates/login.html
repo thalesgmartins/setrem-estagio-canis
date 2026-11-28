@@ -8,121 +8,97 @@
     <link rel="stylesheet" href="/static/css/tailwind.min.css">
     <link rel="stylesheet" href="/static/css/materialdesignicons.min.css">
 </head>
-<body class="min-h-screen font-sans antialiased bg-canvas text-ink-primary">
-    <div class="min-h-screen grid grid-cols-1 lg:grid-cols-12">
+<body class="min-h-screen font-sans antialiased bg-canvas brand-panel-bg text-ink-primary flex flex-col items-center justify-center p-6">
 
-        <!-- Left Identity Panel -->
-        <section class="lg:col-span-5 brand-panel-bg border-b lg:border-b-0 lg:border-r border-subtle p-8 sm:p-12 flex flex-col justify-between">
-            <div class="flex items-center gap-3">
-                <img src="/static/laika-logo.svg" alt="Laika" class="w-10 h-10 object-contain shrink-0">
-                <div>
-                    <span class="block text-lg font-extrabold tracking-tight text-ink-primary">Laika</span>
-                    <span class="block text-xs text-ink-secondary">Patas e Pelos</span>
-                </div>
-            </div>
+    <main class="w-full max-w-md space-y-6">
+        <div class="bg-surface border border-subtle rounded-2xl p-8 shadow-2xl space-y-6">
 
-            <div class="my-12 lg:my-0 max-w-md space-y-6">
-                <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-ink-primary leading-[1.15]">
-                    Centralize resgates, lares e cuidados em um só lugar.
-                </h1>
-                <p class="text-sm text-ink-secondary leading-relaxed">
-                    Gestão de animais acolhidos, lares temporários, adoções, estoque de ração e financeiro da Patas e Pelos.
-                </p>
-
-                <div class="pt-4 border-t border-subtle/80">
-                    <a href="/adocao"
-                       class="inline-flex items-center gap-2 text-xs font-semibold text-patas-green hover:underline">
-                        <span>Quer adotar um animal? Ver catálogo público</span>
-                        <i class="mdi mdi-arrow-right text-sm"></i>
-                    </a>
-                </div>
-            </div>
-
-            <span class="text-xs text-ink-muted">Patas e Pelos</span>
-        </section>
-
-        <!-- Right Login Form Panel -->
-        <section class="lg:col-span-7 bg-surface flex items-center justify-center p-6 sm:p-12">
-            <div class="w-full max-w-md space-y-6">
-                <div class="space-y-2">
-                    <h2 class="text-2xl font-bold tracking-tight text-ink-primary">
-                        Entrar no Laika
-                    </h2>
-                    <p class="text-sm text-ink-secondary">
-                        Acesso para voluntários e coordenação autorizados.
+            <!-- Brand Header -->
+            <div class="text-center space-y-3">
+                <img src="/static/laika-logo.svg" alt="Laika" class="w-12 h-12 object-contain mx-auto">
+                <div class="space-y-1">
+                    <h1 class="text-2xl font-extrabold tracking-tight text-ink-primary">
+                        Laika
+                    </h1>
+                    <p class="text-xs text-ink-secondary">
+                        ONG Patas e Pelos · Horizontina/RS
                     </p>
                 </div>
-
-                {% if erro %}
-                <div class="p-3.5 rounded-xl bg-red-500/10 border border-red-500/25 text-xs text-red-400 font-medium flex items-center gap-2">
-                    <i class="mdi mdi-alert-circle-outline text-base"></i>
-                    <span>{{ erro }}</span>
-                </div>
-                {% endif %}
-
-                <!-- Google OAuth 2.0 Button -->
-                <a href="/auth/google/login"
-                   class="w-full py-3 px-4 rounded-xl bg-patas-green hover:bg-patas-green-hover text-[#061c14] font-semibold text-sm transition-colors flex items-center justify-center gap-2.5">
-                    <i class="mdi mdi-google text-lg"></i>
-                    <span>Continuar com o Google</span>
-                </a>
-
-                {% if google_oauth_ativo %}
-                <p class="text-xs text-ink-secondary text-center leading-relaxed">
-                    No primeiro acesso com Google, sua conta fica pendente até a aprovação da Coordenação.
+                <p class="text-xs text-ink-muted">
+                    Acesso restrito a voluntários e coordenação.
                 </p>
-                {% else %}
-                <div class="relative flex items-center justify-center">
-                    <div class="border-t border-subtle w-full"></div>
-                    <span class="bg-surface px-3 text-[11px] uppercase tracking-wider text-ink-muted shrink-0">
-                        acesso local
-                    </span>
-                    <div class="border-t border-subtle w-full"></div>
-                </div>
-
-                <form action="/auth/login" method="post" class="space-y-4">
-                    <div class="space-y-1.5">
-                        <label for="email" class="block text-xs font-medium text-ink-secondary">
-                            E-mail
-                        </label>
-                        <input
-                            id="email"
-                            name="email"
-                            type="email"
-                            required
-                            value="coordenacao@patasepelos.org.br"
-                            class="w-full px-3.5 py-2.5 text-sm bg-elevated border border-subtle rounded-xl text-ink-primary placeholder-ink-muted focus:outline-none focus:border-patas-blue focus:ring-2 focus:ring-patas-blue/30 transition-colors">
-                    </div>
-
-                    <div class="space-y-1.5">
-                        <label for="password" class="block text-xs font-medium text-ink-secondary">
-                            Senha
-                        </label>
-                        <input
-                            id="password"
-                            name="password"
-                            type="password"
-                            required
-                            value="prototipo2026"
-                            class="w-full px-3.5 py-2.5 text-sm bg-elevated border border-subtle rounded-xl text-ink-primary placeholder-ink-muted focus:outline-none focus:border-patas-blue focus:ring-2 focus:ring-patas-blue/30 transition-colors">
-                    </div>
-
-                    <button
-                        type="submit"
-                        class="w-full py-2.5 px-4 rounded-xl bg-elevated hover:bg-subtle border border-subtle text-ink-primary font-semibold text-sm transition-colors">
-                        Entrar
-                    </button>
-                </form>
-                {% endif %}
-
-                <div class="pt-4 border-t border-subtle text-center">
-                    <a href="/adocao" class="text-xs text-patas-blue hover:underline font-medium">
-                        Ver Catálogo Público de Adoção
-                    </a>
-                </div>
             </div>
-        </section>
 
-    </div>
+            {% if erro %}
+            <div class="p-3.5 rounded-xl bg-red-500/10 border border-red-500/25 text-xs text-red-400 font-medium flex items-center gap-2">
+                <i class="mdi mdi-alert-circle-outline text-base"></i>
+                <span>{{ erro }}</span>
+            </div>
+            {% endif %}
+
+            <!-- Google OAuth 2.0 Button -->
+            <a href="/auth/google/login"
+               class="w-full py-3 px-4 rounded-xl bg-patas-green hover:bg-patas-green-hover text-[#061c14] font-semibold text-sm transition-colors flex items-center justify-center gap-2.5">
+                <i class="mdi mdi-google text-lg"></i>
+                <span>Continuar com o Google</span>
+            </a>
+
+            {% if google_oauth_ativo %}
+            <p class="text-xs text-ink-muted text-center leading-relaxed">
+                No primeiro acesso, sua conta fica pendente até a aprovação da coordenação.
+            </p>
+            {% else %}
+            <div class="relative flex items-center justify-center">
+                <div class="border-t border-subtle w-full"></div>
+                <span class="bg-surface px-3 text-[11px] uppercase tracking-wider text-ink-muted shrink-0">
+                    acesso local
+                </span>
+                <div class="border-t border-subtle w-full"></div>
+            </div>
+
+            <form action="/auth/login" method="post" class="space-y-4">
+                <div class="space-y-1.5">
+                    <label for="email" class="block text-xs font-medium text-ink-secondary">
+                        E-mail
+                    </label>
+                    <input
+                        id="email"
+                        name="email"
+                        type="email"
+                        required
+                        value="coordenacao@patasepelos.org.br"
+                        class="w-full px-3.5 py-2.5 text-sm bg-elevated border border-subtle rounded-xl text-ink-primary placeholder-ink-muted focus:outline-none focus:border-patas-blue focus:ring-2 focus:ring-patas-blue/30 transition-colors">
+                </div>
+
+                <div class="space-y-1.5">
+                    <label for="password" class="block text-xs font-medium text-ink-secondary">
+                        Senha
+                    </label>
+                    <input
+                        id="password"
+                        name="password"
+                        type="password"
+                        required
+                        value="prototipo2026"
+                        class="w-full px-3.5 py-2.5 text-sm bg-elevated border border-subtle rounded-xl text-ink-primary placeholder-ink-muted focus:outline-none focus:border-patas-blue focus:ring-2 focus:ring-patas-blue/30 transition-colors">
+                </div>
+
+                <button
+                    type="submit"
+                    class="w-full py-2.5 px-4 rounded-xl bg-elevated hover:bg-subtle border border-subtle text-ink-primary font-semibold text-sm transition-colors">
+                    Entrar
+                </button>
+            </form>
+            {% endif %}
+
+            <div class="pt-4 border-t border-subtle text-center">
+                <a href="/adocao" class="inline-flex items-center gap-1.5 text-xs text-patas-green hover:underline font-medium">
+                    <span>Ver Catálogo Público de Adoção</span>
+                    <i class="mdi mdi-arrow-right text-sm"></i>
+                </a>
+            </div>
+        </div>
+    </main>
+
 </body>
 </html>
