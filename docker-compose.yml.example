@@ -7,6 +7,26 @@ services:
     env_file: ".env"
     volumes:
       - laika_uploads:/tmp/uploads/laika
+      - laika_backups:/backups
+      # Descomente abaixo se desejar envio ao Google Drive tambem pelo botao admin:
+      # - ./rclone:/root/.config/rclone:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  backup:
+    image: ghcr.io/thalesgmartins/laika:latest
+    container_name: laika-backup
+    env_file: ".env"
+    environment:
+      BACKUP_DIR: /backups
+    command: ["python", "-m", "setrem_estagio_canis.core.backup", "--daemon"]
+    volumes:
+      - laika_uploads:/tmp/uploads/laika:ro
+      - laika_backups:/backups
+      # Monte a pasta com rclone.conf para enviar os backups ao Google Drive:
+      # - ./rclone:/root/.config/rclone:ro
     depends_on:
       postgres:
         condition: service_healthy
@@ -33,3 +53,4 @@ services:
 volumes:
   postgres_data:
   laika_uploads:
+  laika_backups:

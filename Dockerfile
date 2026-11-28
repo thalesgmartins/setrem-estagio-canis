@@ -3,7 +3,9 @@ FROM python:3.12-slim-bookworm
 RUN apt-get update && apt-get install --no-install-recommends -y \
         build-essential \
         curl \
-        ca-certificates && \
+        ca-certificates \
+        postgresql-client \
+        rclone && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 ENV PYTHONDONTWRITEBYTECODE=1
