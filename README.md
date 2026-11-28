@@ -105,7 +105,7 @@ npx tailwindcss@3 -i ./setrem_estagio_canis/static/css/input.css -o ./setrem_est
 
 ---
 
-## Testes e Qualidade de Codigo
+## Testes e Qualidade de Codigo.
 
 ```bash
 uv run pytest
