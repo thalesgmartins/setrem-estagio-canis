@@ -113,3 +113,48 @@ uv run mypy setrem_estagio_canis tests
 uv run ruff check setrem_estagio_canis tests
 uv run ruff format --check setrem_estagio_canis tests
 ```
+
+
+---
+
+## Rotina Automatizada de Backups (Local + Google Drive)
+
+O Laika possui um modulo dedicado (`setrem_estagio_canis.core.backup`) que gera pacotes compactados `.tar.gz` contendo:
+- Dump consistente do banco de dados (`pg_dump --format=custom` para PostgreSQL ou snapshot atomico via API `sqlite3.backup` para SQLite);
+- Todas as fotos enviadas em `UPLOAD_DIR` (animais, estoque e avatares);
+- `manifest.json` com metadados e checksum SHA-256 do dump.
+
+### Execucao manual ou agendada
+
+```bash
+# Backup unico (manual / cron):
+uv run python -m setrem_estagio_canis.core.backup
+
+# Modo servico (usado no container `backup` do Docker / Swarm):
+uv run python -m setrem_estagio_canis.core.backup --daemon
+```
+
+Administradores tambem podem gerar e baixar backups diretamente pela aba **Configuracoes** (`/configuracoes`).
+
+### Configurar envio automatico para o Google Drive (`rclone`)
+
+1. No computador local (com navegador), gere a configuracao OAuth do `rclone`:
+   ```bash
+   mkdir -p rclone
+   rclone config --config ./rclone/rclone.conf
+   # Escolha: n (new remote) -> nome: gdrive -> storage: drive -> siga a autorizacao Google
+   ```
+2. Defina no `.env`:
+   ```env
+   BACKUP_RCLONE_REMOTE=gdrive:laika-backups
+   BACKUP_RETENTION_DAYS=30
+   BACKUP_INTERVAL_HOURS=24
+   ```
+3. No `docker-compose.yml` (ou stack do Docker Swarm), descomente o volume `./rclone:/root/.config/rclone:ro` no servico `backup` (e opcionalmente no `laika`) e reinicie o stack. A pasta `rclone/` ja esta no `.gitignore` para nunca expor credenciais.
+
+### Restauracao de um backup PostgreSQL
+
+```bash
+tar -xzf laika_backup_YYYYMMDD_HHMMSS.tar.gz -C /tmp/restore
+docker compose exec -T postgres pg_restore --clean --if-exists -U postgres -d laika < /tmp/restore/database.dump
+```
