@@ -15,6 +15,11 @@
         {{ msg_ok }}
     </div>
     {% endif %}
+    {% if msg_erro %}
+    <div class="p-3.5 rounded-xl bg-red-500/10 border border-red-500/25 text-xs text-red-400 font-medium">
+        {{ msg_erro }}
+    </div>
+    {% endif %}
 
     <form action="/auth/perfil" method="post" enctype="multipart/form-data" class="bg-surface border border-subtle rounded-2xl p-6 space-y-6">
 
@@ -124,6 +129,54 @@
             </button>
         </div>
     </form>
+
+    {% if current_user and current_user.role == 'admin' %}
+    <!-- Admin System Backups -->
+    <section class="bg-surface border border-subtle rounded-2xl p-6 space-y-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-subtle">
+            <div>
+                <h2 class="text-sm font-semibold text-ink-primary">Backups do Sistema</h2>
+                <p class="text-xs text-ink-secondary mt-0.5">
+                    Cópia compactada do banco de dados e fotos enviadas.
+                    {% if rclone_remote %}
+                    Sincronização em nuvem ativa (<span class="font-mono">{{ rclone_remote }}</span>).
+                    {% else %}
+                    Armazenamento local (configure <span class="font-mono">BACKUP_RCLONE_REMOTE</span> para envio ao Google Drive).
+                    {% endif %}
+                </p>
+            </div>
+            <form action="/admin/backups/executar" method="post" class="shrink-0">
+                <button
+                    type="submit"
+                    class="px-4 py-2 rounded-xl bg-patas-green hover:bg-patas-green-hover text-[#061c14] text-xs font-semibold inline-flex items-center gap-1.5 transition-colors">
+                    <i class="mdi mdi-cloud-upload-outline text-base"></i>
+                    <span>Gerar Backup Agora</span>
+                </button>
+            </form>
+        </div>
+
+        {% if backups %}
+        <div class="divide-y divide-subtle/70 border border-subtle rounded-xl overflow-hidden">
+            {% for bk in backups %}
+            <div class="px-4 py-3 flex items-center justify-between gap-3 hover:bg-elevated/40 transition-colors">
+                <div class="min-w-0">
+                    <p class="text-xs font-mono font-semibold text-ink-primary truncate">{{ bk.filename }}</p>
+                    <p class="text-[11px] text-ink-muted tabular mt-0.5">{{ bk.created_at_str }} · {{ bk.size_human }}</p>
+                </div>
+                <a
+                    href="/admin/backups/{{ bk.filename }}"
+                    class="px-3 py-1.5 rounded-lg bg-elevated hover:bg-subtle border border-subtle text-xs font-medium text-ink-primary inline-flex items-center gap-1.5 shrink-0">
+                    <i class="mdi mdi-download-outline text-sm"></i>
+                    <span>Baixar</span>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-xs text-ink-muted">Nenhum backup local encontrado ainda.</p>
+        {% endif %}
+    </section>
+    {% endif %}
 
 </div>
 

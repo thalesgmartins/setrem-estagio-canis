@@ -2,6 +2,8 @@
 
 import csv
 import io
+import logging
+import urllib.parse
 import uuid
 from dataclasses import dataclass
 from datetime import datetime
@@ -9,15 +11,23 @@ from pathlib import Path
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
-from fastapi.responses import HTMLResponse, RedirectResponse, Response
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse, Response
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from setrem_estagio_canis.api.auth import (
     get_current_user_optional,
+    require_admin_user,
     user_has_custom_avatar,
 )
+from setrem_estagio_canis.core.backup import (
+    BackupError,
+    list_local_backups,
+    resolve_local_backup_path,
+    run_backup,
+)
 from setrem_estagio_canis.core.config import (
+    BACKUP_RCLONE_REMOTE,
     ONG_CITY,
     ONG_WHATSAPP,
     UPLOAD_DIR,
@@ -65,6 +75,7 @@ from setrem_estagio_canis.database.repository import (
 from setrem_estagio_canis.database.session import get_db
 
 router = APIRouter(tags=["Frontend"])
+_LOGGER = logging.getLogger(__name__)
 
 TEMPLATES_DIR = Path(__file__).resolve().parent.parent / "templates"
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
@@ -1103,18 +1114,59 @@ def settings_page(
     request: Request,
     db: Annotated[Session, Depends(get_db)],
 ) -> HTMLResponse | RedirectResponse:
-    """Render personal account settings (name, avatar, and UI theme)."""
+    """Render personal account settings (name, avatar, theme, and admin backups)."""
     user, redirect = _auth_gate(request, db)
     if redirect is not None or user is None:
         return redirect or RedirectResponse(url="/login", status_code=303)
 
+    is_admin = user.role == "admin"
     return templates.TemplateResponse(
         request=request,
         name="configuracoes.html",
         context={
             **_base_context(user, "configuracoes", "Configurações"),
             "msg_ok": request.query_params.get("ok"),
+            "msg_erro": request.query_params.get("erro"),
+            "backups": list_local_backups()[:10] if is_admin else [],
+            "rclone_remote": BACKUP_RCLONE_REMOTE if is_admin else "",
         },
+    )
+
+
+@router.post("/admin/backups/executar")
+def admin_trigger_backup(
+    admin: Annotated[Usuario, Depends(require_admin_user)],
+) -> RedirectResponse:
+    """Trigger an immediate backup of database and uploads (admin only)."""
+    _ = admin
+    try:
+        res = run_backup()
+    except BackupError as exc:
+        _LOGGER.error("Erro ao gerar backup manual: %s", exc)
+        encoded = urllib.parse.quote_plus(str(exc))
+        return RedirectResponse(url=f"/configuracoes?erro={encoded}", status_code=303)
+
+    cloud_msg = " e enviado para a nuvem" if res.uploaded_to_remote else ""
+    ok_msg = urllib.parse.quote_plus(
+        f"Backup gerado ({res.archive_path.name}){cloud_msg}."
+    )
+    return RedirectResponse(url=f"/configuracoes?ok={ok_msg}", status_code=303)
+
+
+@router.get("/admin/backups/{filename}")
+def admin_download_backup(
+    filename: str,
+    admin: Annotated[Usuario, Depends(require_admin_user)],
+) -> FileResponse:
+    """Download an existing local backup archive (admin only)."""
+    _ = admin
+    path = resolve_local_backup_path(filename)
+    if path is None:
+        raise HTTPException(status_code=404, detail="Arquivo de backup não encontrado.")
+    return FileResponse(
+        path=path,
+        media_type="application/gzip",
+        filename=path.name,
     )
 
 
