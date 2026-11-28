@@ -157,6 +157,25 @@ def test_dump_postgres_raises_when_binary_missing() -> None:
         dump_postgres("postgresql+psycopg://u:p@localhost:5432/laika", dest)
 
 
+def test_dump_postgres_includes_stderr_summary_on_failure() -> None:
+    """Surface concise stderr output when pg_dump exits with non-zero status."""
+    case_dir = _new_case_dir("pg_fail")
+    dest = case_dir / "database.dump"
+    fail_proc: subprocess.CompletedProcess[str] = subprocess.CompletedProcess(
+        args=["pg_dump"],
+        returncode=1,
+        stdout="",
+        stderr="pg_dump: error: aborting because of server version mismatch\n",
+    )
+
+    with (
+        patch("shutil.which", return_value="/usr/bin/pg_dump"),
+        patch("subprocess.run", return_value=fail_proc),
+        pytest.raises(BackupError, match="server version mismatch"),
+    ):
+        dump_postgres("postgresql+psycopg://u:p@postgres:5432/laika", dest)
+
+
 def test_sync_to_rclone_uploads_and_prunes_remote() -> None:
     """Verify rclone copy and remote retention delete are invoked when configured."""
     case_dir = _new_case_dir("rclone_ok")

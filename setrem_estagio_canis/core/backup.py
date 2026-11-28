@@ -104,6 +104,20 @@ class BackupEntry:
         return f"{max(1, round(self.size_bytes / 1024))} KB"
 
 
+def _summarize_stderr(stderr: str | None, max_chars: int = 240) -> str:
+    """Collapse non-empty stderr lines into a concise single-line summary.
+
+    Args:
+        stderr: Raw stderr string from a subprocess execution.
+        max_chars: Maximum length of the returned summary string.
+
+    Returns:
+        Trimmed single-line error summary, or empty string if no stderr.
+    """
+    lines = [line.strip() for line in (stderr or "").splitlines() if line.strip()]
+    return " | ".join(lines[:3])[:max_chars]
+
+
 def _sha256_file(path: Path) -> str:
     """Compute the SHA-256 hex digest of a file using buffered streaming.
 
@@ -241,8 +255,16 @@ def dump_postgres(database_url: str, dest_path: Path) -> Path:
         raise BackupError("Nao foi possivel executar o comando pg_dump.") from exc
 
     if result.returncode != 0:
-        logger.error("pg_dump retornou erro (codigo %d).", result.returncode)
-        raise BackupError(f"pg_dump falhou com codigo {result.returncode}.")
+        summary = _summarize_stderr(result.stderr)
+        logger.error(
+            "pg_dump retornou erro (codigo %d): %s",
+            result.returncode,
+            summary or "sem detalhes no stderr",
+        )
+        msg = f"pg_dump falhou com codigo {result.returncode}."
+        if summary:
+            msg = f"{msg} ({summary})"
+        raise BackupError(msg)
     return dest_path
 
 
@@ -302,8 +324,11 @@ def sync_to_rclone(
         return False
 
     if copy_res.returncode != 0:
+        summary = _summarize_stderr(copy_res.stderr)
         logger.error(
-            "Falha ao enviar backup via rclone (codigo %d).", copy_res.returncode
+            "Falha ao enviar backup via rclone (codigo %d): %s",
+            copy_res.returncode,
+            summary or "sem detalhes no stderr",
         )
         return False
 
